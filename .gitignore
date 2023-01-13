@@ -280,3 +280,6 @@ tys/media/
 .env
 .envs/*
 !.envs/.local/
+
+### Project
+idea.md
