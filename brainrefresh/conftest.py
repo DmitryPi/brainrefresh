@@ -1,5 +1,6 @@
 import pytest
 
+from brainrefresh.questions.tests.factories import Tag, TagFactory
 from brainrefresh.users.models import User
 from brainrefresh.users.tests.factories import UserFactory
 
@@ -12,3 +13,8 @@ def media_storage(settings, tmpdir):
 @pytest.fixture
 def user(db) -> User:
     return UserFactory()
+
+
+@pytest.fixture
+def tag(db) -> Tag:
+    return TagFactory()
