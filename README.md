@@ -88,8 +88,10 @@ classDiagram
         updated_at: DateTimeField
     }
     class Tag {
-        label: CharField[100]
         questions: ManyToMany[Question, related_name='tags']
+        -
+        label: CharField[100]
+        slug: SlugField[110]
     }
     class Choice {
         question: ForeignKey[Question, related_name='choices']
