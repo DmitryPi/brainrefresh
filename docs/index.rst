@@ -1,9 +1,9 @@
-.. Test Your Skills documentation master file, created by
+.. BrainRefresh documentation master file, created by
    sphinx-quickstart.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Test Your Skills's documentation!
+Welcome to BrainRefresh's documentation!
 ======================================================================
 
 .. toctree::
