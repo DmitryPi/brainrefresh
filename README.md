@@ -2,6 +2,117 @@
 
 > Our platform offers a unique and interactive way to prepare for technical interviews and refresh forgotten knowledge in web development and Python. With a collection of challenging quizzes and tests, users can assess their skills and identify areas for improvement. Our platform also provides in-depth explanations and resources to help users deepen their understanding and become interview-ready. Whether you're a seasoned developer or just starting out, our platform is the perfect tool to take your skills to the next level.
 
+> Стек: Django 4.1, Vue.js, Celery, Docker
+
+
+
+## TODO
+---
+
+- Создание Question, Tag, Answer
+- Обновление админа
+- Создание Vue директории
+- Работа с апи Question, Tag, Answer
+- Добавление Session-auth с Vue.js
+
+## Идеи
+
+---
+
+1. Главная страница
+    - интерактив - 3d фигура где каждая часть это навигация (login/reg/questions/tags)
+2. Модели
+    1. Question
+        - User может создавать Question
+    2. Tag
+        - ManyToMany к Question
+        - Поиск, сортировка по тэгам
+    3. Choice
+        - Ответы на вопрос Question
+    4. Answer
+        - Ответ пользователя
+    5. Report
+        - Борьба с ошибками контента и устареванием
+3. User
+    - Личная страница
+    - История прохождения тестов со статусом
+    - Возможность создавать Question
+    - Награды (карма, титул)
+    - Сохранение понравившихся вопросов
+        - Формировать подходящие предложения на основе предпочтений
+    - Статистика и анализ ошибок пользователя в бизнес плане
+4. Questions
+    - Возможность выполнять отдельные задания, а также связанные с quiz
+    - система лайков - динамичные евенты, подобие как в тик-токе
+    - Сбор статистики ответов, ошибок
+    - Показать глобальный процент ответов
+    - Вопросы в разнобой
+    - Режим "на время"
+    - Режим "мне повезет"
+5. Quiz
+    - Отдельная структура
+    - Формирование узконаправленных тестов
+5. Cистема User Ranking
+6. Мобильное приложение
+
+
+## Архитектура
+
+---
+
+```mermaid
+---
+title: Модели
+---
+classDiagram
+    Question <|--|> Tag
+    Question <|-- Choice
+    Question <|-- Report
+    Question <|-- Answer
+    Choice <|-- Answer
+    User <|-- Answer
+    User <|-- Report
+
+    class Question {
+        user: ForeignKey[related_name='questions']
+        -
+        uuid: UUIDField
+        title: CharField[100]
+        text: TextField
+        explanation: TextField
+        language: en | ru
+        report_count()
+        -
+        published: BooleanField
+        created_at: DateTimeField
+        updated_at: DateTimeField
+    }
+    class Tag {
+        label: CharField[100]
+        questions: ManyToMany[Question, related_name='tags']
+    }
+    class Choice {
+        question: ForeignKey[Question, related_name='choices']
+        -
+        uuid: UUIDField
+        text: TextField
+        is_correct: BooleanField
+    }
+    class Report {
+        user = ForeignKey[User, related_name='reports']
+        question = ForeignKey[Question, related_name='reports']
+    }
+    class Answer {
+        user: ForeignKey[User, related_name='answers']
+        question: ForeignKey[Question, related_name='answers']
+        choice: ForeignKey[Choice, related_name='answers']
+        -
+        created_at: DateTimeField
+    }
+    class User {
+
+    }
+```
 
 ## Tests
 
@@ -55,3 +166,11 @@ The following details how to deploy this application.
 ### Docker
 
 See detailed [cookiecutter-django Docker documentation](http://cookiecutter-django.readthedocs.io/en/latest/deployment-with-docker.html).
+
+## Версии
+
+---
+
+### 0.1.0 - (31.01.2023)
+
+- Инициализация проекта
