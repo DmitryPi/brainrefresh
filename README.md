@@ -9,7 +9,6 @@
 ## TODO
 ---
 
-- Создание Vue директории
 - Работа с апи Question, Tag, Answer
 - Добавление Session-auth с Vue.js
 
