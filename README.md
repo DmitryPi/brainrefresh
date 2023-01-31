@@ -10,6 +10,12 @@
 ---
 
 - Работа с апи Question, Tag, Answer
+- Vue setup
+    - Serve Django views and use Vue.js for dynamic parts.
+    - Use Django as a backend API and consume it with Vue.js frontend.
+    - Use Django REST framework to build a RESTful API, then consume it with Vue.js.
+    - Integrate Vue.js components into Django templates using Directives.
+    - Use a build tool such as Webpack to compile Vue.js code and integrate it into Django templates.
 - Добавление Session-auth с Vue.js
 
 ## Идеи
@@ -49,6 +55,7 @@
 5. Quiz
     - Отдельная структура
     - Формирование узконаправленных тестов
+    - Использование компаниями для тестирования сотрудников
 5. Cистема User Ranking
 6. Мобильное приложение
 
