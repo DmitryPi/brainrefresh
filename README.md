@@ -73,21 +73,19 @@ classDiagram
 
     class Question {
         user: ForeignKey[related_name='questions']
+        tags: ManyToMany[Tag, related_name='questions']
         -
         uuid: UUIDField
         title: CharField[100]
         text: TextField
         explanation: TextField
         language: en | ru
-        report_count()
         -
         published: BooleanField
         created_at: DateTimeField
         updated_at: DateTimeField
     }
     class Tag {
-        questions: ManyToMany[Question, related_name='tags']
-        -
         label: CharField[100]
         slug: SlugField[110]
     }

@@ -5,12 +5,14 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from model_utils import FieldTracker
 
+from brainrefresh.utils.misc import get_unique_slug
+
 User = get_user_model()
 
 
 class Tag(models.Model):
     label = models.CharField(max_length=100)
-    slug = models.SlugField(max_length=110, db_index=True, unique=True)
+    slug = models.SlugField(max_length=110, blank=True, db_index=True, unique=True)
     tracker = FieldTracker(fields=["label"])
 
     class Meta:
@@ -21,12 +23,8 @@ class Tag(models.Model):
         return self.label
 
     def save(self, *args, **kwargs):
-        """
-        TODO: slug
-        """
         if not self.slug or self.label != self.tracker.previous("label"):
-            # self.slug = get_unique_slug(Tag, self.label)
-            pass
+            self.slug = get_unique_slug(Tag, self.label)
         return super().save(*args, **kwargs)
 
 

@@ -4,9 +4,9 @@ from django.utils.text import slugify
 from transliterate import translit
 
 
-def get_unique_slug(cls, title: str) -> str:
-    title = translit(title, "ru", reversed=True)  # fix ru unicode titles
-    slug = slugify(title)
+def get_unique_slug(cls, field: str) -> str:
+    field = translit(field, "ru", reversed=True)  # It'll fix ru unicode titles
+    slug = slugify(field)
     unique_slug = slug
     num = 1
     while cls.objects.filter(slug=unique_slug).exists():
