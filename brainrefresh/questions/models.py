@@ -8,6 +8,28 @@ from model_utils import FieldTracker
 User = get_user_model()
 
 
+class Tag(models.Model):
+    label = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=110, db_index=True, unique=True)
+    tracker = FieldTracker(fields=["label"])
+
+    class Meta:
+        verbose_name = _("Tag")
+        verbose_name_plural = _("Tags")
+
+    def __str__(self):
+        return self.label
+
+    def save(self, *args, **kwargs):
+        """
+        TODO: slug
+        """
+        if not self.slug or self.label != self.tracker.previous("label"):
+            # self.slug = get_unique_slug(Tag, self.label)
+            pass
+        return super().save(*args, **kwargs)
+
+
 class Question(models.Model):
     class Lang(models.TextChoices):
         EN = "EN"
@@ -15,6 +37,9 @@ class Question(models.Model):
 
     # related fields
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="%(class)ss")
+    tags = models.ManyToManyField(
+        Tag, blank=True, related_name="%(class)ss", related_query_name="%(class)s"
+    )
     # fields
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
     title = models.CharField(max_length=100)
@@ -48,29 +73,4 @@ class Choice(models.Model):
         verbose_name_plural = _("Choice")
 
     def __str__(self):
-        return self.uuid
-
-
-class Tag(models.Model):
-    # related fields
-    questions = models.ManyToManyField(Question, related_name="%(class)ss")
-    # fields
-    label = models.CharField(max_length=100)
-    slug = models.SlugField(max_length=110, db_index=True, unique=True)
-    tracker = FieldTracker(fields=["label"])
-
-    class Meta:
-        verbose_name = _("Tag")
-        verbose_name_plural = _("Tags")
-
-    def __str__(self):
-        return self.label
-
-    def save(self, *args, **kwargs):
-        """
-        TODO: slug
-        """
-        if not self.slug or self.label != self.tracker.previous("label"):
-            # self.slug = get_unique_slug(Tag, self.label)
-            pass
-        return super().save(*args, **kwargs)
+        return f"{self.question.title} : {str(self.uuid)}"
