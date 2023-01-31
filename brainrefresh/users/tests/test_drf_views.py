@@ -1,7 +1,7 @@
 from django.test import RequestFactory
 
-from tys.users.api.views import UserViewSet
-from tys.users.models import User
+from brainrefresh.users.api.views import UserViewSet
+from brainrefresh.users.models import User
 
 
 class TestUserViewSet:

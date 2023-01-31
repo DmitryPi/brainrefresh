@@ -1,6 +1,6 @@
 from django.urls import resolve, reverse
 
-from tys.users.models import User
+from brainrefresh.users.models import User
 
 
 def test_detail(user: User):

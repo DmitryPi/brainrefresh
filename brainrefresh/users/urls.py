@@ -1,6 +1,6 @@
 from django.urls import path
 
-from tys.users.views import (
+from brainrefresh.users.views import (
     user_detail_view,
     user_redirect_view,
     user_update_view,

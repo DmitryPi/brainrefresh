@@ -2,6 +2,6 @@
 # ------------------------------------------------------------------------------
 POSTGRES_HOST=postgres
 POSTGRES_PORT=5432
-POSTGRES_DB=tys
+POSTGRES_DB=brainrefresh
 POSTGRES_USER=OnzKWocAatmTqUkDwEnrcfDpYQhWQLdc
 POSTGRES_PASSWORD=iAvr0wmkw3KG0d5NQVND0vAAANnMwhwgpR3e6N4qT1nxwBGHcLCrEpguOU62pOR5

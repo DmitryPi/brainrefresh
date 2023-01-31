@@ -1,6 +1,6 @@
 from django.urls import reverse
 
-from tys.users.models import User
+from brainrefresh.users.models import User
 
 
 class TestUserAdmin:

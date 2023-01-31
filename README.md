@@ -25,7 +25,7 @@ For convenience, you can keep your normal user logged in on Chrome and your supe
 
 Running type checks with mypy:
 
-    $ mypy tys
+    $ mypy brainrefresh
 
 ### Test coverage
 
@@ -50,7 +50,7 @@ This app comes with Celery.
 To run a celery worker:
 
 ``` bash
-cd tys
+cd brainrefresh
 celery -A config.celery_app worker -l info
 ```
 

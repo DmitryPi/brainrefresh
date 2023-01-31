@@ -1,7 +1,7 @@
 import pytest
 
-from tys.users.models import User
-from tys.users.tests.factories import UserFactory
+from brainrefresh.users.models import User
+from brainrefresh.users.tests.factories import UserFactory
 
 
 @pytest.fixture(autouse=True)
