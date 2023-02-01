@@ -7,6 +7,8 @@ from model_utils import FieldTracker
 
 from brainrefresh.utils.misc import get_unique_slug
 
+from .managers import QuestionManager
+
 User = get_user_model()
 
 
@@ -33,6 +35,8 @@ class Question(models.Model):
         EN = "EN"
         RU = "RU"
 
+    # managers
+    objects = QuestionManager()
     # related fields
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="%(class)ss")
     tags = models.ManyToManyField(

@@ -9,14 +9,16 @@
 ## TODO
 ---
 
-- Работа с апи Question, Tag, Answer
-- Vue setup
+- Работа с апи Question
+- Эксперименты с Vue
+    - Vue + Vite
     - Serve Django views and use Vue.js for dynamic parts.
     - Use Django as a backend API and consume it with Vue.js frontend.
     - Use Django REST framework to build a RESTful API, then consume it with Vue.js.
     - Integrate Vue.js components into Django templates using Directives.
     - Use a build tool such as Webpack to compile Vue.js code and integrate it into Django templates.
-- Добавление Session-auth с Vue.js
+- Добавление Session-auth с Vue
+- Vue компонент Question
 
 ## Идеи
 
