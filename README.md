@@ -2,14 +2,13 @@
 
 > Our platform offers a unique and interactive way to prepare for technical interviews and refresh forgotten knowledge in web development and Python. With a collection of challenging quizzes and tests, users can assess their skills and identify areas for improvement. Our platform also provides in-depth explanations and resources to help users deepen their understanding and become interview-ready. Whether you're a seasoned developer or just starting out, our platform is the perfect tool to take your skills to the next level.
 
-> Стек: Django 4.1, Vue.js, Celery, Docker
+> Стек: Django 4.1, Vue + Vite, Celery, Docker
 
 
 
 ## TODO
 ---
 
-- Работа с апи Question
 - Эксперименты с Vue
     - Vue + Vite
     - Serve Django views and use Vue.js for dynamic parts.
