@@ -10,9 +10,10 @@
 ---
 
 - Эксперименты с Vue
-    - Vue + Vite
-    - Use a build tool such as Webpack to compile Vue.js code and integrate it into Django templates.
+    - билд index.html в templates/
+    - Vue + django-template теги
 - Добавление Session-auth с Vue
+- Обновить версию проекта
 - Vue компонент Question
 
 ## Идеи

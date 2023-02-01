@@ -13,4 +13,23 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
+  server: {
+    port: 3000
+  },
+  build: {
+    outDir: resolve(__dirname, '../brainrefresh/static/frontend'),
+    assetsDir: '',
+    manifest: true,
+    emptyOutDir: true,
+    target: 'es2015',
+    rollupOptions: {
+      input: {
+        app: resolve(__dirname, 'index.html'),
+        main: resolve(__dirname, 'src/main.js'),
+      },
+      output: {
+        chunkFileNames: undefined,
+      },
+    }
+  }
 })
