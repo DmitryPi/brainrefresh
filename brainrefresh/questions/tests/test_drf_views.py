@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .factories import TagFactory
+from .factories import ChoiceFactory, QuestionFactory, TagFactory
 
 
 class TagViewSetTestCase(APITestCase):
@@ -27,3 +27,13 @@ class TagViewSetTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["label"], "Test Tag 1")
         self.assertEqual(response.data["slug"], "test-tag-1")
+
+
+class QuestionViewSetTestCase(APITestCase):
+    def setUp(self):
+        self.q = QuestionFactory()
+        self.c = ChoiceFactory()
+
+    def test(self):
+        assert self.q.tags.all()
+        assert self.c
