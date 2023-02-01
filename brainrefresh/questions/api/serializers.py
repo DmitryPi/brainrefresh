@@ -21,6 +21,7 @@ class QuestionListSerializer(serializers.ModelSerializer):
         model = Question
         fields = [
             "uuid",
+            "user",
             "tags",
             "title",
             "language",

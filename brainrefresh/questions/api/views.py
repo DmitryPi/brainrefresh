@@ -6,13 +6,8 @@ from rest_framework.mixins import (
 )
 from rest_framework.viewsets import GenericViewSet
 
-from .serializers import (
-    Question,
-    QuestionDetailSerializer,
-    QuestionListSerializer,
-    Tag,
-    TagSerializer,
-)
+from ..models import Question, Tag
+from .serializers import QuestionDetailSerializer, QuestionListSerializer, TagSerializer
 
 
 class TagViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
