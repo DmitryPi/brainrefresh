@@ -25,7 +25,7 @@ export default defineConfig({
     target: 'es2015',
     rollupOptions: {
       input: {
-        app: resolve(__dirname, 'index.html'),  // TODO: specify public path dir
+        // app: resolve(__dirname, 'index.html'),  // TODO: specify public path dir
         main: resolve(__dirname, 'src/main.js'),
       },
       output: {
@@ -35,7 +35,7 @@ export default defineConfig({
           if (/png|jpe?g|svg|gif|tiff|bmp/i.test(extType)) {
             extType = 'images';
           } else if (/ico/i.test(extType)) {
-            extType = 'images/favicons';  // will work if favicon in src/
+            extType = 'images/favicons';
           }
           return `static/${extType}/[name][extname]`;
         },
