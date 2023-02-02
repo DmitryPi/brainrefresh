@@ -18,6 +18,10 @@
 
     <!-- This file stores project-specific CSS -->
     <link href="{% static 'css/project.css' %}" rel="stylesheet">
+    <!-- Frontend build -->
+    <script crossorigin src="{% static 'js/app.js' %}" type="module"></script>
+    <link href="{% static 'js/main.js' %}" rel="modulepreload" crossorigin>
+    <link href="{% static 'css/main.css' %}" rel="stylesheet">
     {% endblock %}
     <!-- Le javascript
     ================================================== -->
@@ -93,6 +97,7 @@
 
       {% block content %}
         <p>Use this document as a way to quick start any new project.</p>
+        <div id="app"></div>
       {% endblock content %}
 
     </div> <!-- /container -->

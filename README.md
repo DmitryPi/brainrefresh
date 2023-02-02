@@ -9,9 +9,7 @@
 ## TODO
 ---
 
-- Эксперименты с Vue
-    - билд index.html в templates/
-    - Vue + django-template теги
+- Django hot-reload
 - Добавление Session-auth с Vue
 - Обновить версию проекта
 - Vue компонент Question
@@ -116,6 +114,36 @@ classDiagram
     }
 ```
 
+## Frontend
+
+---
+
+### Особенности
+
+- Реализован при помощи Vite + Vue (Pseudo-decoupled)
+- Возможность загрузки vue из django
+    - Подробнее в `frontend/vite.config.js`
+    - Билд/Перезагрузка статики на лету в `brainrefresh/static`
+    - Разделение .html файлов
+        - Frontend для локальной разработки (необязательно)
+        - Backend для продакшена
+- Минусы:
+    - Отсутствие хэша у static файлов
+    - Конфликты между статикой бэка и фронта при билде
+    - Возможная путаница при 2+ разработчиков
+
+### Команды
+
+    # В руте
+    npm install
+
+    # Frontend разработка
+    npm run dev
+
+    # Backend разработка (build watch)
+    npm run build-w
+
+
 ## Tests
 
 ---
@@ -172,6 +200,14 @@ See detailed [cookiecutter-django Docker documentation](http://cookiecutter-djan
 ## Версии
 
 ---
+
+
+### 0.2.0 - (02.02.2023)
+
+- Модели для Question, Choice, Tag
+- API для Question, Choice, Tag
+- Frontend билд-система (Vite + Vue)
+
 
 ### 0.1.0 - (31.01.2023)
 

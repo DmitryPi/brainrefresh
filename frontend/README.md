@@ -28,6 +28,12 @@ npm run dev
 npm run build
 ```
 
+### Compile and Minify for Production and Watch for changes
+
+```sh
+npm run build-w
+```
+
 ### Run Unit Tests with [Vitest](https://vitest.dev/)
 
 ```sh
