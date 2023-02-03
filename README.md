@@ -10,8 +10,6 @@
 ---
 
 - Django hot-reload
-- Добавление Session-auth с Vue
-- Обновить версию проекта
 - Vue компонент Question
 
 ## Идеи

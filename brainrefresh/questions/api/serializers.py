@@ -10,13 +10,9 @@ class TagSerializer(serializers.ModelSerializer):
         extra_kwargs = {"url": {"view_name": "api:tag-detail", "lookup_field": "slug"}}
 
 
-class ChoiceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Choice
-        fields = ["uuid", "text", "is_correct"]
-
-
 class QuestionListSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = Question
         fields = [
@@ -35,7 +31,7 @@ class QuestionListSerializer(serializers.ModelSerializer):
 
 
 class QuestionDetailSerializer(serializers.ModelSerializer):
-    choices = ChoiceSerializer(many=True)
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Question
@@ -43,7 +39,6 @@ class QuestionDetailSerializer(serializers.ModelSerializer):
             "uuid",
             "user",
             "tags",
-            "choices",
             "title",
             "text",
             "explanation",
@@ -55,3 +50,9 @@ class QuestionDetailSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "url": {"view_name": "api:question-detail", "lookup_field": "uuid"}
         }
+
+
+class ChoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Choice
+        fields = ["uuid", "text", "is_correct"]

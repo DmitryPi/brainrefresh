@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.mixins import (
     CreateModelMixin,
     ListModelMixin,
@@ -7,7 +8,12 @@ from rest_framework.mixins import (
 from rest_framework.viewsets import GenericViewSet
 
 from ..models import Question, Tag
-from .serializers import QuestionDetailSerializer, QuestionListSerializer, TagSerializer
+from .serializers import (
+    ChoiceSerializer,
+    QuestionDetailSerializer,
+    QuestionListSerializer,
+    TagSerializer,
+)
 
 
 class TagViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
@@ -15,6 +21,22 @@ class TagViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     serializer_class = TagSerializer
     lookup_field = "slug"
     permission_classes = ()
+
+
+class ChoiceViewSet(
+    ListModelMixin,
+    RetrieveModelMixin,
+    UpdateModelMixin,
+    CreateModelMixin,
+    GenericViewSet,
+):
+    serializer_class = ChoiceSerializer
+    lookup_field = "uuid"
+    permission_classes = ()
+
+    def get_queryset(self):
+        question = get_object_or_404(Question, uuid=self.kwargs.get("question_uuid"))
+        return question.choices.all()
 
 
 class QuestionViewSet(
