@@ -55,4 +55,4 @@ class QuestionDetailSerializer(serializers.ModelSerializer):
 class ChoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Choice
-        fields = ["uuid", "text", "is_correct"]
+        fields = ["uuid", "question", "text", "is_correct"]

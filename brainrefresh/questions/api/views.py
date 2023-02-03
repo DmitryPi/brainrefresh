@@ -23,22 +23,6 @@ class TagViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     permission_classes = ()
 
 
-class ChoiceViewSet(
-    ListModelMixin,
-    RetrieveModelMixin,
-    UpdateModelMixin,
-    CreateModelMixin,
-    GenericViewSet,
-):
-    serializer_class = ChoiceSerializer
-    lookup_field = "uuid"
-    permission_classes = ()
-
-    def get_queryset(self):
-        question = get_object_or_404(Question, uuid=self.kwargs.get("question_uuid"))
-        return question.choices.all()
-
-
 class QuestionViewSet(
     ListModelMixin,
     RetrieveModelMixin,
@@ -59,3 +43,19 @@ class QuestionViewSet(
         if self.action == "retrieve":
             return Question.objects.prefetch_related("tags", "choices").published()
         return Question.objects.prefetch_related("tags").published()
+
+
+class ChoiceViewSet(
+    ListModelMixin,
+    RetrieveModelMixin,
+    CreateModelMixin,
+    UpdateModelMixin,
+    GenericViewSet,
+):
+    serializer_class = ChoiceSerializer
+    lookup_field = "uuid"
+    permission_classes = ()
+
+    def get_queryset(self):
+        question = get_object_or_404(Question, uuid=self.kwargs.get("question_uuid"))
+        return question.choices.all()
