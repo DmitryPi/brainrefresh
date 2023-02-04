@@ -9,6 +9,7 @@
 ## TODO
 ---
 
+- Апи рефактринг
 - Django hot-reload
 - Vue компонент Question
 

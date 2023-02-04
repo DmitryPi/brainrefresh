@@ -7,13 +7,15 @@ from rest_framework.mixins import (
 )
 from rest_framework.viewsets import GenericViewSet
 
-from ..models import Question, Tag
 from .serializers import (
     ChoiceSerializer,
+    Question,
     QuestionDetailSerializer,
     QuestionListSerializer,
+    Tag,
     TagSerializer,
 )
+from .validators import validate_uuid
 
 
 class TagViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
@@ -30,18 +32,15 @@ class QuestionViewSet(
     CreateModelMixin,
     GenericViewSet,
 ):
-    serializer_class = QuestionListSerializer
     lookup_field = "uuid"
     permission_classes = ()
 
     def get_serializer_class(self):
-        if self.action == "retrieve":
+        if self.action in ["retrieve", "update"]:
             return QuestionDetailSerializer
-        return super().get_serializer_class()
+        return QuestionListSerializer
 
     def get_queryset(self):
-        if self.action == "retrieve":
-            return Question.objects.prefetch_related("tags", "choices").published()
         return Question.objects.prefetch_related("tags").published()
 
 
@@ -57,5 +56,7 @@ class ChoiceViewSet(
     permission_classes = ()
 
     def get_queryset(self):
-        question = get_object_or_404(Question, uuid=self.kwargs.get("question_uuid"))
+        question_uuid = self.kwargs.get("question_uuid")
+        validate_uuid(question_uuid)
+        question = get_object_or_404(Question, uuid=question_uuid)
         return question.choices.all()

@@ -1,3 +1,4 @@
+from django.urls import reverse
 from rest_framework import serializers
 
 from ..models import Choice, Question, Tag
@@ -10,7 +11,13 @@ class TagSerializer(serializers.ModelSerializer):
         extra_kwargs = {"url": {"view_name": "api:tag-detail", "lookup_field": "slug"}}
 
 
-class QuestionListSerializer(serializers.ModelSerializer):
+class TagSlugSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ["slug"]
+
+
+class QuestionListSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
@@ -26,12 +33,15 @@ class QuestionListSerializer(serializers.ModelSerializer):
             "url",
         ]
         extra_kwargs = {
-            "url": {"view_name": "api:question-detail", "lookup_field": "uuid"}
+            "url": {"view_name": "api:question-detail", "lookup_field": "uuid"},
+            "tags": {"view_name": "api:tag-detail", "lookup_field": "slug"},
         }
 
 
 class QuestionDetailSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    tags = TagSerializer(many=True, read_only=True)
+    choices_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Question
@@ -45,11 +55,13 @@ class QuestionDetailSerializer(serializers.ModelSerializer):
             "language",
             "updated_at",
             "created_at",
-            "url",
+            "choices_url",
         ]
-        extra_kwargs = {
-            "url": {"view_name": "api:question-detail", "lookup_field": "uuid"}
-        }
+
+    def get_choices_url(self, obj):
+        return self.context["request"].build_absolute_uri(
+            reverse("api:choice-list", kwargs={"question_uuid": obj.uuid})
+        )
 
 
 class ChoiceSerializer(serializers.ModelSerializer):

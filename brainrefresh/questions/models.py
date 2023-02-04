@@ -31,10 +31,6 @@ class Tag(models.Model):
 
 
 class Question(models.Model):
-    """
-    TODO: published -> is_published
-    """
-
     class Lang(models.TextChoices):
         EN = "EN"
         RU = "RU"
