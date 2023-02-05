@@ -65,5 +65,7 @@ class ChoiceViewSet(
     def get_queryset(self):
         question_uuid = self.kwargs.get("question_uuid")
         validate_uuid(question_uuid)
-        question = get_object_or_404(Question, uuid=question_uuid)
+        question = get_object_or_404(
+            Question.objects.select_related("question"), uuid=question_uuid
+        )
         return question.choices.all()
