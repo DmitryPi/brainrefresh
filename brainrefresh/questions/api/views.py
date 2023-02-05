@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django_filters import rest_framework as filters
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.mixins import (
     CreateModelMixin,
@@ -36,6 +37,8 @@ class QuestionViewSet(
 ):
     lookup_field = "uuid"
     permission_classes = ()
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_fields = ("language",)
 
     def get_serializer_class(self):
         if self.action in ["retrieve", "update"]:
