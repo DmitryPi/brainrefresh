@@ -9,9 +9,13 @@
 ## TODO
 ---
 
-- Апи рефактринг
-- Django hot-reload
 - Vue компонент Question
+- Апи
+    - Добавление модели Answer к пользователю
+    - Добавление модели Quiz с ManyToMany к Question
+    - Фильтрация questions по пользователю
+    - Фильтрация questions по тегу
+    - Ограничения прав обновления questions и choices для пользователя
 
 ## Идеи
 
