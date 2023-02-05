@@ -39,6 +39,14 @@ class QuestionViewSet(
     permission_classes = ()
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_fields = ("language",)
+    parameters = [
+        OpenApiParameter(
+            name="language",
+            type=str,
+            description="Filter by language (EN or RU)",
+            required=False,
+        ),
+    ]
 
     def get_serializer_class(self):
         if self.action in ["retrieve", "update"]:
