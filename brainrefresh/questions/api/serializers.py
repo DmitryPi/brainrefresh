@@ -1,4 +1,5 @@
 from django.urls import reverse
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from ..models import Choice, Question, Tag
@@ -58,6 +59,7 @@ class QuestionDetailSerializer(serializers.ModelSerializer):
             "choices_url",
         ]
 
+    @extend_schema_field(str)
     def get_choices_url(self, obj):
         return self.context["request"].build_absolute_uri(
             reverse("api:choice-list", kwargs={"question_uuid": obj.uuid})

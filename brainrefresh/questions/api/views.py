@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.mixins import (
     CreateModelMixin,
     ListModelMixin,
@@ -15,7 +16,7 @@ from .serializers import (
     Tag,
     TagSerializer,
 )
-from .validators import validate_uuid
+from .validators import UUID, validate_uuid
 
 
 class TagViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
@@ -44,6 +45,12 @@ class QuestionViewSet(
         return Question.objects.prefetch_related("tags").published()
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter("question_uuid", UUID, OpenApiParameter.PATH),
+        OpenApiParameter("uuid", UUID, OpenApiParameter.PATH),
+    ]
+)
 class ChoiceViewSet(
     ListModelMixin,
     RetrieveModelMixin,
