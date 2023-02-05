@@ -4,8 +4,36 @@ from django.utils.translation import gettext_lazy as _
 from .models import Choice, Question, Tag
 
 
+def make_published(modeladmin, request, qs):
+    qs.update(published=True)
+
+
+def make_unpublished(modeladmin, request, qs):
+    qs.update(published=False)
+
+
+def update_lang_ru(modeladmin, request, qs):
+    qs.update(language=Question.Lang.RU)
+
+
+def update_lang_en(modeladmin, request, qs):
+    qs.update(language=Question.Lang.EN)
+
+
+make_published.short_description = "Опубликовать"
+make_unpublished.short_description = "Снять с публикации"
+update_lang_ru.short_description = "Обновить язык на Русский"
+update_lang_en.short_description = "Обновить язык на Английский"
+
+
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
+    actions = [
+        make_published,
+        make_unpublished,
+        update_lang_ru,
+        update_lang_en,
+    ]
     readonly_fields = [
         "uuid",
         "updated_at",
