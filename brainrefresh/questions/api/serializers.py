@@ -66,7 +66,23 @@ class QuestionDetailSerializer(serializers.ModelSerializer):
         )
 
 
-class ChoiceSerializer(serializers.ModelSerializer):
+class ChoiceListSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Choice
+        fields = ["uuid", "question", "text", "is_correct", "url"]
+
+    @extend_schema_field(str)
+    def get_url(self, obj):
+        rev = reverse(
+            "api:choice-detail",
+            kwargs={"question_uuid": obj.question.uuid, "uuid": obj.uuid},
+        )
+        return self.context.get("request").build_absolute_uri(rev)
+
+
+class ChoiceDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Choice
         fields = ["uuid", "question", "text", "is_correct"]

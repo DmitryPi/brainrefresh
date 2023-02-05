@@ -9,7 +9,8 @@ from rest_framework.mixins import (
 from rest_framework.viewsets import GenericViewSet
 
 from .serializers import (
-    ChoiceSerializer,
+    ChoiceDetailSerializer,
+    ChoiceListSerializer,
     Question,
     QuestionDetailSerializer,
     QuestionListSerializer,
@@ -58,14 +59,16 @@ class ChoiceViewSet(
     UpdateModelMixin,
     GenericViewSet,
 ):
-    serializer_class = ChoiceSerializer
     lookup_field = "uuid"
     permission_classes = ()
 
     def get_queryset(self):
         question_uuid = self.kwargs.get("question_uuid")
         validate_uuid(question_uuid)
-        question = get_object_or_404(
-            Question.objects.select_related("question"), uuid=question_uuid
-        )
+        question = get_object_or_404(Question, uuid=question_uuid)
         return question.choices.all()
+
+    def get_serializer_class(self):
+        if self.action in ["retrieve", "update"]:
+            return ChoiceDetailSerializer
+        return ChoiceListSerializer
