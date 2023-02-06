@@ -9,7 +9,7 @@ export default {
         };
     },
     mounted() {
-        fetch(`${API_URL}/questions/`)
+        fetch(`${API_URL}/questions/f6f2bec8-6782-4c7c-8735-6f2010597dfc/`)
             .then((response) => {
                 if (!response.ok) {
                     throw new Error("Network response was not ok");
@@ -19,7 +19,7 @@ export default {
             .then((data) => {
                 console.log(data);
                 this.loading = false;
-                this.questions = data;
+                this.question = data;
             })
             .catch((error) => {
                 console.error(
@@ -32,10 +32,5 @@ export default {
 </script>
 
 <template>
-    <div class="question">test</div>
+    <div class="question">{{ question.uuid }}</div>
 </template>
-
-<style scoped lang="sass">
-.question
-    background-color: red
-</style>
