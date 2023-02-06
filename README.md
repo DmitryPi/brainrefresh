@@ -11,6 +11,7 @@
 
 - Vue компонент Question
 - Апи
+    - Убрать все id
     - Добавление модели Answer к пользователю
     - Добавление модели Quiz с ManyToMany к Question
     - Фильтрация questions по пользователю
