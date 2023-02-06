@@ -49,7 +49,7 @@ export default {
     </ul>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .questions {
     display: flex;
     flex-direction: column;
@@ -59,13 +59,13 @@ export default {
     margin-bottom: 1em;
     border: 1px solid var(--color-border);
     border-radius: 5px;
-}
-.questions__question:hover {
-    background-color: var(--color-background-soft);
-    border: 1px solid var(--color-border-hover);
-}
-.questions__question a {
-    display: block;
-    background: none;
+    &:hover {
+        background-color: var(--color-background-soft);
+        border: 1px solid var(--color-border-hover);
+    }
+    a {
+        display: block;
+        background: none;
+    }
 }
 </style>
