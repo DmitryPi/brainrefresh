@@ -2,31 +2,34 @@
 const API_URL = import.meta.env.VITE_API_HOST_URL;
 
 export default {
+    name: "Question",
     data() {
         return {
-            loading: true,
-            questions: [],
+            question: {},
         };
     },
-    mounted() {
-        fetch(`${API_URL}/questions/f6f2bec8-6782-4c7c-8735-6f2010597dfc/`)
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
-            .then((data) => {
-                console.log(data);
-                this.loading = false;
-                this.question = data;
-            })
-            .catch((error) => {
-                console.error(
-                    "There was a problem with the fetch operation:",
-                    error
-                );
-            });
+    created() {
+        this.fetchQuestionData(this.$route.params.uuid);
+    },
+    methods: {
+        fetchQuestionData(uuid) {
+            fetch(`${API_URL}/questions/${uuid}/`)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    this.question = data;
+                })
+                .catch((error) => {
+                    console.error(
+                        "There was a problem with the fetch operation:",
+                        error
+                    );
+                });
+        },
     },
 };
 </script>

@@ -18,7 +18,6 @@ export default {
                 return response.json();
             })
             .then((data) => {
-                console.log(data);
                 this.loading = false;
                 this.questions = data;
             })
@@ -40,11 +39,13 @@ export default {
             v-for="question in questions"
             :key="question.uuid"
         >
-            <a :href="'/questions/' + question.uuid">
+            <router-link
+                :to="{ name: 'question', params: { uuid: question.uuid } }"
+            >
                 <span>{{ question.title }}</span>
                 <p>{{ question.tags.label }}</p>
                 <span>{{ question.created_at }}</span>
-            </a>
+            </router-link>
         </li>
     </ul>
 </template>
