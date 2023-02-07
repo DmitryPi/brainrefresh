@@ -7,19 +7,23 @@
     "build": "vite build --config frontend/vite.config.js",
     "build-w": "vite build --watch --config frontend/vite.config.js",
     "preview": "vite preview --config frontend/vite.config.js",
-    "test:unit": "vitest --environment jsdom --root frontend/src/ --config frontend/vite.config.js",
     "test:e2e": "start-server-and-test preview :4173 'cypress run --e2e' --config frontend/vite.config.js",
     "test:e2e:dev": "start-server-and-test 'vite dev --port 4173' :4173 'cypress open --e2e' --config frontend/vite.config.js",
+    "test:unit": "cypress run --component",
+    "test:unit:dev": "cypress open --component",
     "lint": "eslint ./frontend --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore --config frontend/vite.config.js"
   },
   "dependencies": {
     "sass": "^1.58.0",
-    "vue": "^3.2.45"
+    "vue": "^3.2.45",
+    "vue-router": "^4.1.6"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",
     "@vitejs/plugin-vue-jsx": "^3.0.0",
     "@vue/test-utils": "^2.2.6",
+    "@vue/eslint-config-prettier": "^7.0.0",
+    "@rushstack/eslint-patch": "^1.1.4",
     "cypress": "^12.0.2",
     "eslint": "^8.22.0",
     "eslint-plugin-cypress": "^2.12.1",

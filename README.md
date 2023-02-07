@@ -9,8 +9,17 @@
 ## TODO
 ---
 
-- Vue router
+- Фронт Роутинг вопросов
+- Апи QuestionList теги
+- Создание Question Form
 - Апи
+    - Замена OpenApiTypes.Uuid
+    - OOP with serializer (list-detail)
+    - Пагинация вопросов
+    - HyperlinkedModelSerializer:
+        You can also use primary key and various other relationships,
+        but hyperlinking is good RESTful design.
+    - rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly
     - Убрать все id
     - Добавление модели Answer к пользователю
     - Добавление модели Quiz с ManyToMany к Question
