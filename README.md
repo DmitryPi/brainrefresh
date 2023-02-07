@@ -9,9 +9,9 @@
 ## TODO
 ---
 
-- Фронт Роутинг вопросов
-- Апи QuestionList теги
 - Создание Question Form
+- Question mock data
+- Апи QuestionList теги
 - Апи
     - Замена OpenApiTypes.Uuid
     - OOP with serializer (list-detail)
