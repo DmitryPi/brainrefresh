@@ -1,5 +1,5 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView } from "vue-router";
 import Question from "./components/Question.vue";
 import QuestionList from "./components/QuestionList.vue";
 </script>

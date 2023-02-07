@@ -18,11 +18,12 @@
 
     <!-- This file stores project-specific CSS -->
     <link href="{% static 'css/project.css' %}" rel="stylesheet">
-    <!-- Frontend build -->
-    <script crossorigin src="{% static 'js/app.js' %}" type="module"></script>
-    <link href="{% static 'js/main.js' %}" rel="modulepreload" crossorigin>
-    <link href="{% static 'css/main.css' %}" rel="stylesheet">
-    {% endblock %}
+    {% endblock css %}
+
+    <!-- Frontend -->
+    {% block cssfront %}
+    {% endblock cssfront %}
+
     <!-- Le javascript
     ================================================== -->
     {# Placed at the top of the document so pages load faster with defer #}
@@ -40,7 +41,7 @@
 
   <body>
 
-    <div class="mb-1">
+    <header class="container mb-1">
       <nav class="navbar navbar-expand-md navbar-light bg-light">
         <div class="container-fluid">
           <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -81,26 +82,20 @@
           </div>
         </div>
       </nav>
+    </header>
 
-    </div>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-dismissible {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
 
-    <div class="container">
-
-      {% if messages %}
-        {% for message in messages %}
-          <div class="alert alert-dismissible {% if message.tags %}alert-{{ message.tags }}{% endif %}">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        {% endfor %}
-      {% endif %}
-
-      {% block content %}
-        <p>Use this document as a way to quick start any new project.</p>
-        <div id="app"></div>
-      {% endblock content %}
-
-    </div> <!-- /container -->
+    {% block content %}
+      <div id="app"></div>
+    {% endblock content %}
 
     {% block modal %}{% endblock modal %}
 
