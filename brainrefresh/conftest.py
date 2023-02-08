@@ -1,6 +1,8 @@
 import pytest
 
 from brainrefresh.questions.tests.factories import (
+    Answer,
+    AnswerFactory,
     Choice,
     ChoiceFactory,
     Question,
@@ -35,3 +37,8 @@ def question(db) -> Question:
 @pytest.fixture
 def choice(db) -> Choice:
     return ChoiceFactory()
+
+
+@pytest.fixture
+def answer(db) -> Answer:
+    return AnswerFactory()

@@ -7,7 +7,7 @@ from factory.fuzzy import FuzzyChoice
 
 from brainrefresh.users.tests.factories import UserFactory
 
-from ..models import Choice, Question, Tag
+from ..models import Answer, Choice, Question, Tag
 
 
 class TagFactory(DjangoModelFactory):
@@ -52,3 +52,27 @@ class ChoiceFactory(DjangoModelFactory):
     question = SubFactory(QuestionFactory)
     text = Faker("text")
     is_correct = FuzzyChoice([True, False])
+
+
+class AnswerFactory(DjangoModelFactory):
+    class Meta:
+        model = Answer
+
+    user = SubFactory(UserFactory)
+    question = SubFactory(QuestionFactory)
+
+    @post_generation
+    def choices(self, create: bool, extracted: Sequence[Any], **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of choices were passed in, use them
+            for choice in extracted:
+                self.choices.add(choice)
+        else:
+            size = 2
+            for _ in range(size):
+                choice = ChoiceFactory()
+                self.choices.add(choice)

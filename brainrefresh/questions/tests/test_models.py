@@ -6,7 +6,16 @@ from django.utils.text import slugify
 
 from brainrefresh.users.tests.factories import UserFactory
 
-from .factories import Choice, ChoiceFactory, Question, QuestionFactory, Tag, TagFactory
+from .factories import (
+    Answer,
+    AnswerFactory,
+    Choice,
+    ChoiceFactory,
+    Question,
+    QuestionFactory,
+    Tag,
+    TagFactory,
+)
 
 
 class TagTests(TestCase):
@@ -63,7 +72,7 @@ class TagTests(TestCase):
 
 class QuestionTests(TestCase):
     def setUp(self):
-        self.user = UserFactory(username="testuser", password="12345")
+        self.user = UserFactory(username="testuser")
         self.tag = TagFactory(label="test_tag")
         self.question_data = {
             "user": self.user,
@@ -162,3 +171,52 @@ class ChoiceTests(TestCase):
         self.question.delete()
         with self.assertRaises(Choice.DoesNotExist):
             Choice.objects.get(id=choice_id)
+
+
+class AnswerTests(TestCase):
+    def setUp(self):
+        self.user = UserFactory(username="testuser")
+        self.question = QuestionFactory(title="What is the capital of France?")
+        self.choice_1 = ChoiceFactory(
+            question=self.question, text="Paris", is_correct=True
+        )
+        self.choice_2 = ChoiceFactory(
+            question=self.question, text="London", is_correct=False
+        )
+        self.answer = AnswerFactory(
+            user=self.user,
+            question=self.question,
+            choices=[self.choice_1, self.choice_2],
+        )
+
+    def test_create(self):
+        self.assertEqual(self.answer.user, self.user)
+        self.assertEqual(self.answer.question, self.question)
+        self.assertEqual(self.answer.choices.count(), 2)
+
+    def test_update(self):
+        self.answer.question = QuestionFactory(title="What is the capital of Germany?")
+        self.answer.choices.set([self.choice_1])
+        self.answer.save()
+        self.answer.refresh_from_db()
+        self.assertEqual(self.answer.question.title, "What is the capital of Germany?")
+        self.assertEqual(self.answer.choices.count(), 1)
+
+    def test_delete(self):
+        self.assertEqual(Answer.objects.count(), 1)
+
+        # delete the answer
+        self.answer.delete()
+        self.assertEqual(Answer.objects.count(), 0)
+        self.assertEqual(Question.objects.count(), 1)
+        self.assertEqual(Choice.objects.count(), 2)
+
+    def test_str(self):
+        answer = Answer.objects.create(user=self.user, question=self.question)
+        self.assertEqual(
+            str(answer), f"{self.user.username} answered {self.question.title}"
+        )
+
+    def test_uuid_generated(self):
+        answer = Answer.objects.create(user=self.user, question=self.question)
+        self.assertIsInstance(answer.uuid, UUID)
