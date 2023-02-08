@@ -12,7 +12,6 @@ export default {
             question: {},
             choices: [],
             formType: formTypes.RADIO,
-            selectedOption: "",
             selectedOptions: [],
             answerResult: null,
             formSubmitted: false,
@@ -61,6 +60,7 @@ export default {
                     );
                 });
         },
+
         setFormType() {
             const correctChoices = this.choices.filter(
                 (choice) => choice.is_correct === true
@@ -70,19 +70,48 @@ export default {
                     ? formTypes.CHECKBOX
                     : formTypes.RADIO;
         },
-        checkAnswer() {
+
+        checkRadio() {
             const answer = this.choices.find((choice) => {
-                return choice.text === this.selectedOption;
+                return choice.text === this.selectedOptions;
             });
             this.answerResult = answer.is_correct;
         },
-        checkAnswers() {},
+
+        checkCheckbox() {
+            // TODO: compile result, show what was right/wrong
+            let allCorrect = true;
+            this.selectedOptions.forEach((selectedOption) => {
+                const answer = this.choices.find(
+                    (choice) => choice.text === selectedOption
+                );
+                if (!answer || !answer.is_correct) {
+                    allCorrect = false;
+                }
+            });
+            this.answerResult = allCorrect;
+        },
+
+        checkAnswers() {
+            switch (this.formType) {
+                case formTypes.RADIO:
+                    this.checkRadio();
+                    break;
+                case formTypes.CHECKBOX:
+                    this.checkCheckbox(this);
+                    break;
+            }
+        },
+
         saveAnswer() {},
+
         submitForm() {
+            console.log(this.selectedOptions);
+            if (!this.selectedOptions.length) {
+                return;
+            }
             this.formSubmitted = true;
-            this.formType === formTypes.RADIO
-                ? this.checkAnswer()
-                : this.checkAnswers();
+            this.checkAnswers();
         },
     },
 };
@@ -90,6 +119,7 @@ export default {
 
 <template>
     <h1>{{ question.title }}</h1>
+
     <template v-if="formType === 'RADIO'">
         <form @submit.prevent="submitForm">
             <p v-for="(choice, index) in choices" :key="choice.uuid">
@@ -97,7 +127,7 @@ export default {
                     :id="'option' + (index + 1)"
                     type="radio"
                     :value="choice.text"
-                    v-model="selectedOption"
+                    v-model="selectedOptions"
                     name="question"
                 />
                 <label :for="'option' + (index + 1)"
@@ -124,6 +154,7 @@ export default {
             <button type="submit">Submit</button>
         </form>
     </template>
+
     <div v-if="formSubmitted">
         <p v-if="answerResult">Ответ верный</p>
         <p v-else>Ответ не верный</p>
