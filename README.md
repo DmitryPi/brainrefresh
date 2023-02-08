@@ -9,7 +9,7 @@
 ## TODO
 ---
 
-- Тест AnswerViewSet, urls
+- Тест AnswerViewSet
 - Апи
     - QuestionList теги
     - Замена OpenApiTypes.Uuid
