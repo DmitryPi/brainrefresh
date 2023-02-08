@@ -8,6 +8,9 @@ export default {
             question: {},
             choices: [],
             selectedOption: "",
+            selectedOptionResult: null,
+            formSubmitted: false,
+            questionExplain: false,
         };
     },
     created() {
@@ -42,7 +45,6 @@ export default {
                     return response.json();
                 })
                 .then((data) => {
-                    console.log(data);
                     this.choices = data;
                 })
                 .catch((error) => {
@@ -52,8 +54,16 @@ export default {
                     );
                 });
         },
+        checkAnswer() {
+            const answer = this.choices.find((choice) => {
+                return choice.text === this.selectedOption;
+            });
+            this.selectedOptionResult = answer.is_correct;
+        },
+        saveAnswer() {},
         submitForm() {
-            console.log("Selected option: ", this.selectedOption);
+            this.formSubmitted = true;
+            this.checkAnswer();
         },
     },
 };
@@ -70,8 +80,20 @@ export default {
                 v-model="selectedOption"
                 name="question"
             />
-            <label :for="'option' + (index + 1)">{{ choice.text }}</label>
+            <label :for="'option' + (index + 1)"
+                >{{ choice.text }} {{ choice.is_correct }}</label
+            >
         </p>
         <button type="submit">Submit</button>
     </form>
+    <div v-if="formSubmitted">
+        <p v-if="selectedOptionResult">Ответ верный</p>
+        <p v-else>Ответ не верный</p>
+        <div>
+            <button @click="questionExplain = !questionExplain">
+                Объяснение
+            </button>
+            <p v-if="questionExplain">{{ question.explanation }}</p>
+        </div>
+    </div>
 </template>
