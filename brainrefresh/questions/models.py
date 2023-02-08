@@ -76,3 +76,25 @@ class Choice(models.Model):
 
     def __str__(self):
         return f"{self.question.title} : {str(self.uuid)}"
+
+
+class Answer(models.Model):
+    """
+    TODO: choices question validation (prevent adding choices from another question)
+    """
+
+    # related fields
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="%(class)ss")
+    question = models.ForeignKey(
+        Question, on_delete=models.CASCADE, related_name="%(class)ss"
+    )
+    choices = models.ManyToManyField(Choice, related_name="%(class)ss")
+    # fields
+    uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
+
+    class Meta:
+        verbose_name = _("Answer")
+        verbose_name_plural = _("Answers")
+
+    def __str__(self):
+        return f"{self.user.username} answered {self.question.title}"

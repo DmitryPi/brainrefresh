@@ -1,7 +1,13 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-from .models import Choice, Question, Tag
+from .models import Answer, Choice, Question, Tag
+
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    fieldsets = ((None, {"fields": (("label", "slug"))}),)
+    list_display = ("label", "slug")
 
 
 def make_published(modeladmin, request, qs):
@@ -82,7 +88,9 @@ class ChoiceAdmin(admin.ModelAdmin):
     list_display = ("__str__", "is_correct")
 
 
-@admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
-    fieldsets = ((None, {"fields": (("label", "slug"))}),)
-    list_display = ("label", "slug")
+@admin.register(Answer)
+class AnswerAdmin(admin.ModelAdmin):
+    readonly_fields = [
+        "uuid",
+    ]
+    filter_horizontal = ["choices"]
