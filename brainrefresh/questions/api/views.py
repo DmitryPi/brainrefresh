@@ -10,6 +10,8 @@ from rest_framework.mixins import (
 from rest_framework.viewsets import GenericViewSet
 
 from .serializers import (
+    Answer,
+    AnswerSerializer,
     ChoiceDetailSerializer,
     ChoiceListSerializer,
     Question,
@@ -83,3 +85,22 @@ class ChoiceViewSet(
         if self.action in ["retrieve", "update"]:
             return ChoiceDetailSerializer
         return ChoiceListSerializer
+
+
+class AnswerViewSet(
+    ListModelMixin,
+    RetrieveModelMixin,
+    CreateModelMixin,
+    UpdateModelMixin,
+    GenericViewSet,
+):
+    serializer_class = AnswerSerializer
+    lookup_field = "uuid"
+
+    def get_queryset(self):
+        queryset = (
+            Answer.objects.filter(user=self.request.user)
+            .select_related("question")
+            .prefetch_related("choices__question")
+        )
+        return queryset

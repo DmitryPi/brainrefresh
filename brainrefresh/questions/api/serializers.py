@@ -2,7 +2,7 @@ from django.urls import reverse
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from ..models import Choice, Question, Tag
+from ..models import Answer, Choice, Question, Tag
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -82,7 +82,23 @@ class ChoiceListSerializer(serializers.ModelSerializer):
         return self.context.get("request").build_absolute_uri(rev)
 
 
-class ChoiceDetailSerializer(serializers.ModelSerializer):
+class ChoiceDetailSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Choice
         fields = ["uuid", "question", "text", "is_correct"]
+        extra_kwargs = {
+            "question": {"view_name": "api:question-detail", "lookup_field": "uuid"},
+        }
+
+
+class AnswerSerializer(serializers.HyperlinkedModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    choices = ChoiceDetailSerializer(many=True)
+
+    class Meta:
+        model = Answer
+        fields = ["url", "uuid", "user", "question", "choices", "is_correct"]
+        extra_kwargs = {
+            "url": {"view_name": "api:answer-detail", "lookup_field": "uuid"},
+            "question": {"view_name": "api:question-detail", "lookup_field": "uuid"},
+        }

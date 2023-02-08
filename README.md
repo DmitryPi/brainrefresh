@@ -9,9 +9,9 @@
 ## TODO
 ---
 
-- Question mock data
-- Апи QuestionList теги
+- Тест AnswerViewSet, urls
 - Апи
+    - QuestionList теги
     - Замена OpenApiTypes.Uuid
     - OOP with serializer (list-detail)
     - Пагинация вопросов
