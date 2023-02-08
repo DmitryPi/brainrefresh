@@ -213,6 +213,12 @@ See detailed [cookiecutter-django Docker documentation](http://cookiecutter-djan
 
 ---
 
+### 0.4.0 - (08.02.2023)
+
+- Покрытие тестами всех моделей
+- Модель Answer + API
+- Frontend компоненты Question, QuestionList
+- Frontend роутинг
 
 ### 0.2.0 - (02.02.2023)
 
