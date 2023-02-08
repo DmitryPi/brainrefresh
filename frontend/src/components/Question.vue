@@ -1,5 +1,9 @@
 <script>
 const API_URL = import.meta.env.VITE_API_HOST_URL;
+const formTypes = {
+    CHECKBOX: "CHECKBOX",
+    RADIO: "RADIO",
+};
 
 export default {
     name: "Question",
@@ -7,8 +11,10 @@ export default {
         return {
             question: {},
             choices: [],
+            formType: formTypes.RADIO,
             selectedOption: "",
-            selectedOptionResult: null,
+            selectedOptions: [],
+            answerResult: null,
             formSubmitted: false,
             questionExplain: false,
         };
@@ -46,6 +52,7 @@ export default {
                 })
                 .then((data) => {
                     this.choices = data;
+                    this.setFormType();
                 })
                 .catch((error) => {
                     console.error(
@@ -54,16 +61,28 @@ export default {
                     );
                 });
         },
+        setFormType() {
+            const correctChoices = this.choices.filter(
+                (choice) => choice.is_correct === true
+            );
+            this.formType =
+                correctChoices.length > 1
+                    ? formTypes.CHECKBOX
+                    : formTypes.RADIO;
+        },
         checkAnswer() {
             const answer = this.choices.find((choice) => {
                 return choice.text === this.selectedOption;
             });
-            this.selectedOptionResult = answer.is_correct;
+            this.answerResult = answer.is_correct;
         },
+        checkAnswers() {},
         saveAnswer() {},
         submitForm() {
             this.formSubmitted = true;
-            this.checkAnswer();
+            this.formType === formTypes.RADIO
+                ? this.checkAnswer()
+                : this.checkAnswers();
         },
     },
 };
@@ -71,23 +90,42 @@ export default {
 
 <template>
     <h1>{{ question.title }}</h1>
-    <form @submit.prevent="submitForm">
-        <p v-for="(choice, index) in choices" :key="choice.uuid">
-            <input
-                :id="'option' + (index + 1)"
-                type="radio"
-                :value="choice.text"
-                v-model="selectedOption"
-                name="question"
-            />
-            <label :for="'option' + (index + 1)"
-                >{{ choice.text }} {{ choice.is_correct }}</label
-            >
-        </p>
-        <button type="submit">Submit</button>
-    </form>
+    <template v-if="formType === 'RADIO'">
+        <form @submit.prevent="submitForm">
+            <p v-for="(choice, index) in choices" :key="choice.uuid">
+                <input
+                    :id="'option' + (index + 1)"
+                    type="radio"
+                    :value="choice.text"
+                    v-model="selectedOption"
+                    name="question"
+                />
+                <label :for="'option' + (index + 1)"
+                    >{{ choice.text }} {{ choice.is_correct }}</label
+                >
+            </p>
+            <button type="submit">Submit</button>
+        </form>
+    </template>
+    <template v-else>
+        <form @submit.prevent="submitForm">
+            <p v-for="(choice, index) in choices" :key="choice.uuid">
+                <input
+                    :id="'option' + (index + 1)"
+                    type="checkbox"
+                    :value="choice.text"
+                    v-model="selectedOptions"
+                    name="question"
+                />
+                <label :for="'option' + (index + 1)">
+                    {{ choice.text }} {{ choice.is_correct }}
+                </label>
+            </p>
+            <button type="submit">Submit</button>
+        </form>
+    </template>
     <div v-if="formSubmitted">
-        <p v-if="selectedOptionResult">Ответ верный</p>
+        <p v-if="answerResult">Ответ верный</p>
         <p v-else>Ответ не верный</p>
         <div>
             <button @click="questionExplain = !questionExplain">
