@@ -60,6 +60,7 @@ class AnswerFactory(DjangoModelFactory):
 
     user = SubFactory(UserFactory)
     question = SubFactory(QuestionFactory)
+    is_correct = FuzzyChoice([True, False])
 
     @post_generation
     def choices(self, create: bool, extracted: Sequence[Any], **kwargs):

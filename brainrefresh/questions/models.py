@@ -91,6 +91,7 @@ class Answer(models.Model):
     choices = models.ManyToManyField(Choice, related_name="%(class)ss")
     # fields
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
+    is_correct = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = _("Answer")

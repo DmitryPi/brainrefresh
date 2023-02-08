@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from django.db.models import ProtectedError
 from django.test import TestCase
 from django.utils import timezone
 from django.utils.text import slugify
@@ -118,6 +119,11 @@ class QuestionTests(TestCase):
         self.assertEqual(self.question.user, self.user)
         self.assertIn(self.tag, self.question.tags.all())
 
+    def test_user_cannot_be_deleted(self):
+        # Test user models.PROTECT
+        with self.assertRaises(ProtectedError):
+            self.user.delete()
+
 
 class ChoiceTests(TestCase):
     def setUp(self):
@@ -151,26 +157,26 @@ class ChoiceTests(TestCase):
         self.choice.delete()
         self.assertEqual(Choice.objects.count(), 5)
 
+    def test_delete_cascade(self):
+        choice_id = self.choice.id
+        self.question.delete()
+        with self.assertRaises(Choice.DoesNotExist):
+            Choice.objects.get(id=choice_id)
+
     def test_fields(self):
         self.assertIsInstance(self.choice, Choice)
         self.assertIsInstance(self.choice.uuid, UUID)
         self.assertEqual(self.choice.text, self.choice_data["text"])
         self.assertFalse(self.choice.is_correct)
 
-    def test_str(self):
-        self.assertEqual(
-            str(self.choice), f"{self.question.title} : {str(self.choice.uuid)}"
-        )
-
     def test_related_fields(self):
         self.assertIsInstance(self.choice.question, Question)
         self.assertEqual(self.choice.question, self.question)
 
-    def test_delete_cascade(self):
-        choice_id = self.choice.id
-        self.question.delete()
-        with self.assertRaises(Choice.DoesNotExist):
-            Choice.objects.get(id=choice_id)
+    def test_str(self):
+        self.assertEqual(
+            str(self.choice), f"{self.question.title} : {str(self.choice.uuid)}"
+        )
 
 
 class AnswerTests(TestCase):
@@ -211,12 +217,17 @@ class AnswerTests(TestCase):
         self.assertEqual(Question.objects.count(), 1)
         self.assertEqual(Choice.objects.count(), 2)
 
+    def test_fields(self):
+        self.assertIsInstance(self.answer.uuid, UUID)
+        self.assertIsInstance(self.answer.is_correct, bool)
+
+    def test_related_fields(self):
+        self.assertEqual(self.answer.user, self.user)
+        self.assertIsInstance(self.answer.question, Question)
+        self.assertIsInstance(self.answer.choices.first(), Choice)
+
     def test_str(self):
         answer = Answer.objects.create(user=self.user, question=self.question)
         self.assertEqual(
             str(answer), f"{self.user.username} answered {self.question.title}"
         )
-
-    def test_uuid_generated(self):
-        answer = Answer.objects.create(user=self.user, question=self.question)
-        self.assertIsInstance(answer.uuid, UUID)
