@@ -106,12 +106,12 @@ export default {
         saveAnswer() {},
 
         submitForm() {
-            console.log(this.selectedOptions);
             if (!this.selectedOptions.length) {
                 return;
             }
             this.formSubmitted = true;
             this.checkAnswers();
+            this.saveAnswer();
         },
     },
 };

@@ -9,7 +9,6 @@
 ## TODO
 ---
 
-- Создание Question Form
 - Question mock data
 - Апи QuestionList теги
 - Апи
