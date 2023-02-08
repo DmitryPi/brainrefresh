@@ -1,7 +1,12 @@
+from uuid import UUID
+
 from django.test import TestCase
+from django.utils import timezone
 from django.utils.text import slugify
 
-from .factories import Tag, TagFactory
+from brainrefresh.users.tests.factories import UserFactory
+
+from .factories import Question, QuestionFactory, Tag, TagFactory
 
 
 class TagTests(TestCase):
@@ -54,3 +59,57 @@ class TagTests(TestCase):
         previous_slug = self.tag.slug
         self.tag.save()
         self.assertEqual(previous_slug, self.tag.slug)
+
+
+class QuestionTests(TestCase):
+    def setUp(self):
+        self.user = UserFactory(username="testuser", password="12345")
+        self.tag = TagFactory(label="test_tag")
+        self.question = QuestionFactory(
+            user=self.user,
+            title="Test Question Title",
+            text="Test Question Text",
+            explanation="Test explanation",
+            language=Question.Lang.EN,
+            published=True,
+        )
+
+    def test_create(self):
+        self.assertEqual(Question.objects.count(), 1)
+        self.assertEqual(self.question.title, "Test Question Title")
+        self.assertEqual(self.question.text, "Test Question Text")
+        self.assertEqual(self.question.explanation, "Test explanation")
+        self.assertEqual(self.question.language, Question.Lang.EN)
+        self.assertTrue(self.question.published)
+
+    def test_update(self):
+        self.question.title = "Updated test question"
+        self.question.save()
+        self.question.refresh_from_db()
+        self.assertEqual(Question.objects.count(), 1)
+        self.assertEqual(self.question.title, "Updated test question")
+        self.assertEqual(self.question.text, "Test Question Text")
+        self.assertEqual(self.question.explanation, "Test explanation")
+        self.assertEqual(self.question.language, Question.Lang.EN)
+        self.assertTrue(self.question.published)
+
+    def test_delete(self):
+        self.question.delete()
+        self.assertEqual(Question.objects.count(), 0)
+
+    def test_str(self):
+        self.assertEqual(str(self.question), "Test Question Title")
+
+    def test_fields(self):
+        self.question.tags.add(self.tag)
+        self.question.refresh_from_db()
+        # assert fields are correctly saved and retrieved
+        self.assertEqual(self.question.user, self.user)
+        self.assertEqual(self.question.title, "Test Question Title")
+        self.assertEqual(self.question.text, "Test Question Text")
+        self.assertEqual(self.question.language, Question.Lang.EN)
+        self.assertEqual(self.question.published, True)
+        self.assertIsInstance(self.question.uuid, UUID)
+        self.assertIsInstance(self.question.created_at, timezone.datetime)
+        self.assertIsInstance(self.question.updated_at, timezone.datetime)
+        self.assertIn(self.tag, self.question.tags.all())
