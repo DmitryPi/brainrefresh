@@ -92,6 +92,8 @@ class Answer(models.Model):
     # fields
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
     is_correct = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = _("Answer")
