@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
@@ -92,14 +93,44 @@ class ChoiceDetailSerializer(serializers.HyperlinkedModelSerializer):
         fields = ["uuid", "question", "text", "is_correct"]
 
 
+class AnswerChoiceSerializer(serializers.ModelSerializer):
+    question = serializers.UUIDField(source="question.uuid")
+
+    class Meta:
+        model = Choice
+        fields = ["uuid", "question", "text", "is_correct"]
+
+
 class AnswerSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    choices = ChoiceDetailSerializer(many=True)
+    question = serializers.UUIDField(source="question.uuid")
+    choices = AnswerChoiceSerializer(many=True)
 
     class Meta:
         model = Answer
-        fields = ["url", "uuid", "user", "question", "choices", "is_correct"]
+        fields = [
+            "url",
+            "uuid",
+            "user",
+            "question",
+            "choices",
+            "is_correct",
+            "created_at",
+        ]
         extra_kwargs = {
             "url": {"view_name": "api:answer-detail", "lookup_field": "uuid"},
             "question": {"view_name": "api:question-detail", "lookup_field": "uuid"},
         }
+
+    def create(self, validated_data):
+        """
+        TODO: nested creation
+        """
+        question_data = validated_data.pop("question")
+        choices_data = validated_data.pop("choices")
+        question = get_object_or_404(Answer, uuid=question_data["uuid"])
+        answer = Answer.objects.create(question=question, **validated_data)
+        for choice_data in choices_data:
+            choice = get_object_or_404(Choice, uuid=choice_data["uuid"])
+            answer.add(choice)
+        return answer

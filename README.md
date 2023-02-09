@@ -9,9 +9,9 @@
 ## TODO
 ---
 
-- Тест AnswerViewSet
 - Апи
     - QuestionList теги
+    - question/choices only list, choices/ (cud)
     - Замена OpenApiTypes.Uuid
     - OOP with serializer (list-detail)
     - Пагинация вопросов

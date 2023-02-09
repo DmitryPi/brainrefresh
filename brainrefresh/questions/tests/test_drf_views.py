@@ -242,6 +242,16 @@ class AnswerViewSetTests(APITestCase):
         self.question = QuestionFactory(
             title="What is Django?", text="Django is a high-level Python web framework"
         )
+        # Create Choices
+        self.choices = [
+            ChoiceFactory(
+                question=self.question, text="Python Framework", is_correct=True
+            ),
+            ChoiceFactory(
+                question=self.question, text="Programming Language", is_correct=False
+            ),
+            ChoiceFactory(question=self.question, text="The Movie", is_correct=False),
+        ]
         # Create Answers
         self.answers = [
             AnswerFactory(question=self.question, user=self.user, is_correct=True),
@@ -283,23 +293,69 @@ class AnswerViewSetTests(APITestCase):
         # Login user
         self.client.force_login(self.user)
         # Build question hyperlink
-        question_url = self.factory.get(self.question_detail_url).build_absolute_uri()
+        # question_url = self.factory.get(self.question_detail_url).build_absolute_uri()
         # Get API response
         response = self.client.get(self.answer_detail_url)
         # Test response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Test serialized data
         self.assertEqual(response.data["uuid"], str(self.answers[0].uuid))
-        self.assertEqual(response.data["question"], question_url)
+        self.assertEqual(response.data["question"], str(self.question.uuid))
         self.assertEqual(response.data["is_correct"], True)
 
     def test_retrieve_anon(self):
         response = self.client.get(self.answer_detail_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_create(self):
-        """TODO"""
-        pass
+    # def test_create_answer(self):
+    #     self.client.login(**self.user_log_pass)
+    #     question_url = self.factory.get(self.question_detail_url).build_absolute_uri()
+    #     data = {
+    #         "question": self.question.uuid,
+    #         "choices": [
+    #             {
+    #                 "uuid": self.choices[0].uuid,
+    #                 "question": self.question.uuid,
+    #                 "text": self.choices[0].text,
+    #                 "is_correct": self.choices[0].is_correct,
+    #             }
+    #         ],
+    #     }
+    #     response = self.client.post("/api/answers/", data, format="json")
+    #     self.assertEqual(response.content, "ABC")
+    #     self.assertEqual(response.status_code, 201)
+
+    # self.assertEqual(Answer.objects.count(), 1)
+    # answer = Answer.objects.first()
+    # self.assertEqual(answer.user, self.user)
+    # self.assertEqual(answer.question, self.question)
+    # self.assertEqual(answer.choices.count(), 1)
+    # self.assertEqual(answer.choices.first(), self.choice)
+
+    # def test_create(self):
+    #     # Login user
+    #     self.client.force_login(self.user)
+    #     # Answer data
+    #     question_url = self.factory.get(self.question_detail_url).build_absolute_uri()
+    #     data = {
+    #         "question": question_url,
+    #         "choices": [
+    #             {
+    #                 "uuid": self.choices[0].uuid,
+    #                 "question": question_url,
+    #                 "text": "Раз",
+    #                 "is_correct": True,
+    #             },
+    #         ],
+    #         "is_correct": True,
+    #     }
+    #     response = self.client.post(self.answer_list_url, data)
+    #     self.assertEqual(response.content, "ABC")
+
+    # def test_create_anon(self):
+    #     data = {"question": self.question.uuid}
+    #     response = self.client.post(self.answer_list_url, data)
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update(self):
         """TODO"""
