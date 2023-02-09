@@ -6,12 +6,19 @@ from rest_framework import status
 from rest_framework.test import APIClient, APIRequestFactory, APITestCase
 
 from ..api.serializers import QuestionDetailSerializer, QuestionListSerializer
-from .factories import ChoiceFactory, Question, QuestionFactory, TagFactory
+from .factories import (
+    AnswerFactory,
+    ChoiceFactory,
+    Question,
+    QuestionFactory,
+    TagFactory,
+    UserFactory,
+)
 
 User = get_user_model()
 
 
-class TagViewSetTestCase(APITestCase):
+class TagViewSetTests(APITestCase):
     def setUp(self):
         """
         TODO: test permissions
@@ -35,17 +42,16 @@ class TagViewSetTestCase(APITestCase):
         self.assertEqual(response.data["slug"], "test-tag-1")
 
 
-class QuestionViewSetTestCase(APITestCase):
+class QuestionViewSetTests(APITestCase):
     def setUp(self):
         # Create a user to use for authentication
-        self.user = User.objects.create_user(
-            username="testuser", password="testpassword"
-        )
+        self.user_log_pass = {"username": "testuser", "password": "testpassword"}
+        self.user = UserFactory(**self.user_log_pass)
         # Create request factory
         self.factory = APIRequestFactory()
         # Create a client to make API requests
         self.client = APIClient()
-        self.client.login(username="testuser", password="testpassword")
+        self.client.login(**self.user_log_pass)
 
         # Create some data for testing
         self.question_1 = QuestionFactory(
@@ -73,7 +79,7 @@ class QuestionViewSetTestCase(APITestCase):
         response = self.client.get("/api/questions/")
 
         # Check that the response has a status code of 200 (OK)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Check that the returned data is what we expect
         serializer = QuestionListSerializer(
@@ -89,7 +95,7 @@ class QuestionViewSetTestCase(APITestCase):
         response = self.client.get(f"/api/questions/{self.question_1.uuid}/")
 
         # Check that the response has a status code of 200 (OK)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Check that the returned data is what we expect
         serializer = QuestionDetailSerializer(
@@ -108,7 +114,7 @@ class QuestionViewSetTestCase(APITestCase):
         )
 
         # Check that the response has a status code of 200 (OK)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Check that the question has been updated in the database
         self.question_1.refresh_from_db()
@@ -126,13 +132,13 @@ class QuestionViewSetTestCase(APITestCase):
         )
 
         # Check that the response has a status code of 201 (Created)
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # Check that the new question has been created in the database
         self.assertTrue(Question.objects.filter(title="What is your address?").exists())
 
 
-class ChoiceViewSetTestCase(APITestCase):
+class ChoiceViewSetTests(APITestCase):
     def setUp(self):
         # Create a Question and Choices mock data
         self.question = QuestionFactory(title="What is the meaning of life?")
@@ -224,3 +230,77 @@ class ChoiceViewSetTestCase(APITestCase):
         response = self.client.get(url)
         # Assert that the response status code is 404 Not Found
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class AnswerViewSetTests(APITestCase):
+    def setUp(self):
+        # Create a user to use for authentication
+        self.user_log_pass = {"username": "testuser", "password": "testpassword"}
+        self.user = UserFactory(**self.user_log_pass)
+        self.user_1 = UserFactory()
+        # Create Question
+        self.question = QuestionFactory(
+            title="What is Django?", text="Django is a high-level Python web framework"
+        )
+        # Create Answers
+        self.answers = [
+            AnswerFactory(question=self.question, user=self.user, is_correct=True),
+            AnswerFactory(question=self.question, user=self.user, is_correct=True),
+            AnswerFactory(question=self.question, user=self.user_1, is_correct=True),
+        ]
+        # Create request factory
+        self.factory = APIRequestFactory()
+        self.answer_list_url = reverse("api:answer-list")
+        self.answer_detail_url = reverse(
+            "api:answer-detail", kwargs={"uuid": self.answers[0].uuid}
+        )
+        self.question_detail_url = reverse(
+            "api:question-detail", kwargs={"uuid": self.question.uuid}
+        )
+
+    def test_list(self):
+        # Test correct list of answers for request.user
+        users = [
+            {"instance": self.user, "answers_len": 2},
+            {"instance": self.user_1, "answers_len": 1},
+        ]
+        for user in users:
+            # Login user
+            self.client.force_login(user["instance"])
+            # Send a GET request to the list endpoint
+            response = self.client.get(reverse("api:answer-list"))
+
+            # Check that the response has a status code of 200 (OK)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            # Check that the returned data is what we expect
+            self.assertEqual(len(response.data), user["answers_len"])
+
+    def test_list_anon(self):
+        response = self.client.get(self.answer_list_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_retrieve(self):
+        # Login user
+        self.client.force_login(self.user)
+        # Build question hyperlink
+        question_url = self.factory.get(self.question_detail_url).build_absolute_uri()
+        # Get API response
+        response = self.client.get(self.answer_detail_url)
+        # Test response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Test serialized data
+        self.assertEqual(response.data["uuid"], str(self.answers[0].uuid))
+        self.assertEqual(response.data["question"], question_url)
+        self.assertEqual(response.data["is_correct"], True)
+
+    def test_retrieve_anon(self):
+        response = self.client.get(self.answer_detail_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_create(self):
+        """TODO"""
+        pass
+
+    def test_update(self):
+        """TODO"""
+        pass
