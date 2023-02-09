@@ -13,12 +13,6 @@ class TagSerializer(serializers.ModelSerializer):
         extra_kwargs = {"url": {"view_name": "api:tag-detail", "lookup_field": "slug"}}
 
 
-class TagSlugSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ["slug"]
-
-
 class QuestionListSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 

@@ -7,6 +7,7 @@ from rest_framework.mixins import (
     RetrieveModelMixin,
     UpdateModelMixin,
 )
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
 from .serializers import (
@@ -96,6 +97,7 @@ class AnswerViewSet(
 ):
     serializer_class = AnswerSerializer
     lookup_field = "uuid"
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         queryset = (

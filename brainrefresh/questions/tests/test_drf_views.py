@@ -5,6 +5,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APIRequestFactory, APITestCase
 
+from brainrefresh.users.tests.factories import SuperUserFactory, UserFactory
+
 from ..api.serializers import QuestionDetailSerializer, QuestionListSerializer
 from .factories import (
     AnswerFactory,
@@ -12,7 +14,6 @@ from .factories import (
     Question,
     QuestionFactory,
     TagFactory,
-    UserFactory,
 )
 
 User = get_user_model()
@@ -235,9 +236,12 @@ class ChoiceViewSetTests(APITestCase):
 class AnswerViewSetTests(APITestCase):
     def setUp(self):
         # Create a user to use for authentication
-        self.user_log_pass = {"username": "testuser", "password": "testpassword"}
+        self.user_log_pass = {
+            "username": "testuser",
+            "password": "testpassword",
+        }
         self.user = UserFactory(**self.user_log_pass)
-        self.user_1 = UserFactory()
+        self.user_1 = SuperUserFactory()
         # Create Question
         self.question = QuestionFactory(
             title="What is Django?", text="Django is a high-level Python web framework"
@@ -264,6 +268,9 @@ class AnswerViewSetTests(APITestCase):
         self.answer_detail_url = reverse(
             "api:answer-detail", kwargs={"uuid": self.answers[0].uuid}
         )
+        self.answer_detail_url_admin = reverse(
+            "api:answer-detail", kwargs={"uuid": self.answers[2].uuid}
+        )
         self.question_detail_url = reverse(
             "api:question-detail", kwargs={"uuid": self.question.uuid}
         )
@@ -285,7 +292,17 @@ class AnswerViewSetTests(APITestCase):
             # Check that the returned data is what we expect
             self.assertEqual(len(response.data), user["answers_len"])
 
-    def test_list_anon(self):
+    def test_list_permissions_user(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.answer_list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_list_permissions_admin(self):
+        self.client.force_login(self.user_1)
+        response = self.client.get(self.answer_list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_list_permissions_anon(self):
         response = self.client.get(self.answer_list_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -303,7 +320,17 @@ class AnswerViewSetTests(APITestCase):
         self.assertEqual(response.data["question"], str(self.question.uuid))
         self.assertEqual(response.data["is_correct"], True)
 
-    def test_retrieve_anon(self):
+    def test_retrieve_permissions_user(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.answer_detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_retrieve_permissions_admin(self):
+        self.client.force_login(self.user_1)
+        response = self.client.get(self.answer_detail_url_admin)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_retrieve_permissions_anon(self):
         response = self.client.get(self.answer_detail_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
