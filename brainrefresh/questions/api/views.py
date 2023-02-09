@@ -24,7 +24,7 @@ from .validators import UUID, validate_uuid
 
 
 class TagViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
-    queryset = Tag.objects.all()
+    queryset = Tag.objects.prefetch_related("questions")
     serializer_class = TagSerializer
     lookup_field = "slug"
     permission_classes = ()

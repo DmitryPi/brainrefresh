@@ -9,7 +9,7 @@ from ..models import Answer, Choice, Question, Tag
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ["label", "slug", "url"]
+        fields = ["label", "slug", "question_count", "url"]
         extra_kwargs = {"url": {"view_name": "api:tag-detail", "lookup_field": "slug"}}
 
 
@@ -93,7 +93,9 @@ class ChoiceDetailSerializer(serializers.HyperlinkedModelSerializer):
         fields = ["uuid", "question", "text", "is_correct"]
 
 
-class AnswerChoiceSerializer(serializers.ModelSerializer):
+class _AnswerChoiceSerializer(serializers.ModelSerializer):
+    """Used for serializing Answer model choices field"""
+
     question = serializers.UUIDField(source="question.uuid")
 
     class Meta:
@@ -104,7 +106,7 @@ class AnswerChoiceSerializer(serializers.ModelSerializer):
 class AnswerSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     question = serializers.UUIDField(source="question.uuid")
-    choices = AnswerChoiceSerializer(many=True)
+    choices = _AnswerChoiceSerializer(many=True)
 
     class Meta:
         model = Answer

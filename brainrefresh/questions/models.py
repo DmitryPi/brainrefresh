@@ -29,6 +29,11 @@ class Tag(models.Model):
             self.slug = get_unique_slug(Tag, self.label)
         return super().save(*args, **kwargs)
 
+    @property
+    def question_count(self):
+        """Will generate n+1 query - add prefetch_related("questions")"""
+        return self.questions.count()
+
 
 class Question(models.Model):
     class Lang(models.TextChoices):

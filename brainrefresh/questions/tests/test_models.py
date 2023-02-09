@@ -70,6 +70,21 @@ class TagTests(TestCase):
         self.tag.save()
         self.assertEqual(previous_slug, self.tag.slug)
 
+    def test_propery_question_count(self):
+        # create new tag
+        new_tag = TagFactory(label=self.tag_data["label"])
+        # test existing tags
+        self.assertEqual(self.tag.question_count, 0)
+        self.assertEqual(new_tag.question_count, 0)
+        # update question tags
+        questions = QuestionFactory.create_batch(5)
+        for question in questions:
+            question.tags.add(self.tag)
+        questions[0].tags.add(new_tag)
+        # test Tag question_count
+        self.assertEqual(self.tag.question_count, 5)
+        self.assertEqual(new_tag.question_count, 1)
+
 
 class QuestionTests(TestCase):
     def setUp(self):

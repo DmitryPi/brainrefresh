@@ -7,7 +7,11 @@ from .models import Answer, Choice, Question, Tag
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     fieldsets = ((None, {"fields": (("label", "slug"))}),)
-    list_display = ("label", "slug")
+    list_display = ("label", "slug", "question_count")
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.prefetch_related("questions")
 
 
 def make_published(modeladmin, request, qs):
@@ -87,6 +91,10 @@ class ChoiceAdmin(admin.ModelAdmin):
     )
     list_display = ("__str__", "is_correct")
 
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.select_related("question")
+
 
 @admin.register(Answer)
 class AnswerAdmin(admin.ModelAdmin):
@@ -94,3 +102,7 @@ class AnswerAdmin(admin.ModelAdmin):
         "uuid",
     ]
     filter_horizontal = ["choices"]
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.select_related("user")

@@ -25,6 +25,7 @@
     - Фильтрация questions по пользователю
     - Фильтрация questions по тегу
     - Ограничения прав обновления questions и choices для пользователя
+    - API Permissions - it's time
 
 ## Идеи
 
