@@ -83,12 +83,13 @@ class ChoiceListSerializer(serializers.ModelSerializer):
 
 
 class ChoiceDetailSerializer(serializers.HyperlinkedModelSerializer):
+    question = serializers.HyperlinkedRelatedField(
+        view_name="api:question-detail", lookup_field="uuid", read_only=True
+    )
+
     class Meta:
         model = Choice
         fields = ["uuid", "question", "text", "is_correct"]
-        extra_kwargs = {
-            "question": {"view_name": "api:question-detail", "lookup_field": "uuid"},
-        }
 
 
 class AnswerSerializer(serializers.HyperlinkedModelSerializer):
