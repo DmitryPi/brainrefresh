@@ -4,6 +4,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django_filters import rest_framework as filters
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.mixins import (
     CreateModelMixin,
@@ -30,7 +31,7 @@ from .serializers import (
     Tag,
     TagSerializer,
 )
-from .validators import UUID, validate_uuid
+from .validators import validate_uuid
 
 
 class TagViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
@@ -85,8 +86,8 @@ class QuestionViewSet(
 
 @extend_schema(
     parameters=[
-        OpenApiParameter("question_uuid", UUID, OpenApiParameter.PATH),
-        OpenApiParameter("uuid", UUID, OpenApiParameter.PATH),
+        OpenApiParameter("question_uuid", OpenApiTypes.UUID, OpenApiParameter.PATH),
+        OpenApiParameter("uuid", OpenApiTypes.UUID, OpenApiParameter.PATH),
     ]
 )
 class ChoiceViewSet(
