@@ -10,10 +10,7 @@
 ---
 
 - Апи
-    - QuestionList теги
     - question/choices only list, choices/ (cud)
-    - Замена OpenApiTypes.Uuid
-    - OOP with serializer (list-detail)
     - Пагинация вопросов
     - HyperlinkedModelSerializer:
         You can also use primary key and various other relationships,

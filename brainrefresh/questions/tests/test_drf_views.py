@@ -116,7 +116,6 @@ class QuestionViewSetTests(APITestCase):
                 {"slug": self.tag_1.slug},
                 {"slug": self.tag_2.slug, "label": "123"},
             ],
-            "is_published": True,
         }
         self.q_data_1 = {
             "user": self.user.pk,

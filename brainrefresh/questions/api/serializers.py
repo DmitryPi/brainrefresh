@@ -14,11 +14,17 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class _QuestionTagSerializer(serializers.Serializer):
-    label = serializers.CharField(required=False)
+    url = serializers.HyperlinkedIdentityField(
+        view_name="api:tag-detail", lookup_field="slug"
+    )
+    label = serializers.CharField(read_only=True)
     slug = serializers.SlugField()
 
 
-class QuestionListSerializer(serializers.ModelSerializer):
+class QuestionBaseSerializer(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(
+        view_name="api:question-detail", lookup_field="uuid"
+    )
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     tags = _QuestionTagSerializer(Tag.objects.all(), many=True, required=False)
 
@@ -30,12 +36,21 @@ class QuestionListSerializer(serializers.ModelSerializer):
             "user",
             "tags",
             "title",
+            "text",
+            "explanation",
             "language",
             "updated_at",
             "created_at",
         ]
+
+
+class QuestionListSerializer(QuestionBaseSerializer):
+    class Meta:
+        model = QuestionBaseSerializer.Meta.model
+        fields = QuestionBaseSerializer.Meta.fields
         extra_kwargs = {
-            "url": {"view_name": "api:question-detail", "lookup_field": "uuid"},
+            "text": {"write_only": True},
+            "explanation": {"write_only": True},
         }
 
     def create(self, validated_data):
@@ -50,23 +65,12 @@ class QuestionListSerializer(serializers.ModelSerializer):
         return question
 
 
-class QuestionDetailSerializer(serializers.ModelSerializer):
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    tags = TagSerializer(many=True, read_only=True)
+class QuestionDetailSerializer(QuestionBaseSerializer):
     choices_url = serializers.SerializerMethodField()
 
     class Meta:
-        model = Question
-        fields = [
-            "uuid",
-            "user",
-            "tags",
-            "title",
-            "text",
-            "explanation",
-            "language",
-            "updated_at",
-            "created_at",
+        model = QuestionBaseSerializer.Meta.model
+        fields = QuestionBaseSerializer.Meta.fields + [
             "choices_url",
         ]
 
