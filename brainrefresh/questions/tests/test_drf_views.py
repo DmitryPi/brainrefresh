@@ -24,6 +24,7 @@ class TagViewSetTests(APITestCase):
         """
         TODO: test permissions
         """
+        self.user = UserFactory()
         self.tag_1 = TagFactory(label="Test Tag 1")
         self.tag_2 = TagFactory(label="Test Tag 2")
         self.list_url = reverse("api:tag-list")
@@ -34,6 +35,16 @@ class TagViewSetTests(APITestCase):
         # test response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
+
+    def test_list_permissions_user(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_list_permissions_anon(self):
+        self.client.logout()
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_list_caching(self):
         response = self.client.get(self.list_url)
@@ -47,6 +58,16 @@ class TagViewSetTests(APITestCase):
         self.assertEqual(response.data["slug"], "test-tag-1")
         self.assertEqual(response.data["question_count"], 0)
         self.assertIn(self.detail_url, response.data["url"])
+
+    def test_retrieve_permissions_user(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_retrieve_permissions_anon(self):
+        self.client.logout()
+        response = self.client.get(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_retrieve_caching(self):
         response = self.client.get(self.detail_url)
@@ -63,9 +84,6 @@ class QuestionViewSetTests(APITestCase):
         # Create a client to make API requests
         self.client = APIClient()
         self.client.login(**self.user_log_pass)
-        # urls
-        self.list_url = reverse("api:question-list")
-
         # Create some data for testing
         self.question_1 = QuestionFactory(
             title="What is your name?",
@@ -85,6 +103,26 @@ class QuestionViewSetTests(APITestCase):
         self.question_2.tags.add(self.tag_2)
         self.choice1 = ChoiceFactory(question=self.question_1, text="John")
         self.choice2 = ChoiceFactory(question=self.question_1, text="Jane")
+        # urls
+        self.list_url = reverse("api:question-list")
+        self.detail_url = reverse(
+            "api:question-detail", kwargs={"uuid": self.question_1.uuid}
+        )
+        # test question data
+        self.q_data = {
+            "user": self.user.pk,
+            "title": "What is your address?",
+            "tags": [
+                {"slug": self.tag_1.slug},
+                {"slug": self.tag_2.slug, "label": "123"},
+            ],
+            "is_published": True,
+        }
+        self.q_data_1 = {
+            "user": self.user.pk,
+            "title": "What is your name?",
+            "language": "RU",
+        }
 
     def test_list(self):
         # Send a GET request to the list endpoint
@@ -102,35 +140,29 @@ class QuestionViewSetTests(APITestCase):
         )
         self.assertEqual(response.data, serializer.data)
 
+    def test_list_permissions_anon(self):
+        self.client.logout()
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     def test_create(self):
         # Send a POST request to the create endpoint
-        data = {
-            "user": self.user.pk,
-            "title": "What is your address?",
-            "tags": [
-                {"slug": self.tag_1.slug},
-                {"slug": self.tag_2.slug, "label": "123"},
-            ],
-            "is_published": True,
-        }
-        data_1 = {
-            "user": self.user.pk,
-            "title": "What is your name?",
-            "language": "RU",
-        }
-        response = self.client.post(self.list_url, data, format="json")
-        response_1 = self.client.post(self.list_url, data_1)
-        print(response.content)
-        print(response.content)
+        response = self.client.post(self.list_url, self.q_data, format="json")
+        response_1 = self.client.post(self.list_url, self.q_data_1)
         # Check that the response has a status code of 201 (Created)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response_1.status_code, status.HTTP_201_CREATED)
         # Check that the new question has been created in the database
-        self.assertTrue(Question.objects.filter(title=data["title"]).exists())
-        self.assertTrue(Question.objects.filter(title=data_1["title"]).exists())
+        self.assertTrue(Question.objects.filter(title=self.q_data["title"]).exists())
+        self.assertTrue(Question.objects.filter(title=self.q_data_1["title"]).exists())
         # Check that tags were added
         self.assertTrue(len(response.data["tags"]), 2)
         self.assertFalse(len(response_1.data["tags"]))
+
+    def test_create_permissions_anon(self):
+        self.client.logout()
+        response = self.client.post(self.list_url, self.q_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_retrieve(self):
         # Send a GET request to the retrieve endpoint for the first question
@@ -148,6 +180,11 @@ class QuestionViewSetTests(APITestCase):
             context={"request": request},
         )
         self.assertEqual(response.data, serializer.data)
+
+    def test_retrieve_permissions_anon(self):
+        self.client.logout()
+        response = self.client.get(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update(self):
         # Send a PUT request to the update endpoint for the first question
