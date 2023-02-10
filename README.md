@@ -10,6 +10,7 @@
 ---
 
 - Апи
+    - caching for QuestionViewSet list/retrieve with update on save
     - question/choices only list, choices/ (cud)
     - Пагинация вопросов
     - HyperlinkedModelSerializer:

@@ -107,6 +107,7 @@ class Answer(models.Model):
     class Meta:
         verbose_name = _("Answer")
         verbose_name_plural = _("Answers")
+        ordering = ["-updated_at"]
 
     def __str__(self):
         return f"{self.user.username} answered {self.question.title}"
