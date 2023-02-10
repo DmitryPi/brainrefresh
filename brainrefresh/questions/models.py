@@ -31,7 +31,9 @@ class Tag(models.Model):
 
     @property
     def question_count(self):
-        """Will generate n+1 query - add prefetch_related("questions")"""
+        """Will generate n+1 query - query requires prefetch_related("questions")
+        TODO: refactor as service function or smh else
+        """
         return self.questions.count()
 
 

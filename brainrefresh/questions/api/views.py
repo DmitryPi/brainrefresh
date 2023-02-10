@@ -7,7 +7,7 @@ from rest_framework.mixins import (
     RetrieveModelMixin,
     UpdateModelMixin,
 )
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
 from .serializers import (
@@ -28,7 +28,7 @@ class TagViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     queryset = Tag.objects.prefetch_related("questions")
     serializer_class = TagSerializer
     lookup_field = "slug"
-    permission_classes = ()
+    permission_classes = (AllowAny,)
 
 
 class QuestionViewSet(
