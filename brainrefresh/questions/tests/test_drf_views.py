@@ -127,10 +127,8 @@ class QuestionViewSetTests(APITestCase):
         # Send a GET request to the list endpoint
         request = self.factory.get(self.list_url)
         response = self.client.get(self.list_url)
-
         # Check that the response has a status code of 200 (OK)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
         # Check that the returned data is what we expect
         serializer = QuestionListSerializer(
             instance=Question.objects.published(),
@@ -147,7 +145,7 @@ class QuestionViewSetTests(APITestCase):
     def test_create(self):
         # Send a POST request to the create endpoint
         response = self.client.post(self.list_url, self.q_data, format="json")
-        response_1 = self.client.post(self.list_url, self.q_data_1)
+        response_1 = self.client.post(self.list_url, self.q_data_1, format="json")
         # Check that the response has a status code of 201 (Created)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response_1.status_code, status.HTTP_201_CREATED)
@@ -167,10 +165,8 @@ class QuestionViewSetTests(APITestCase):
         # Send a GET request to the retrieve endpoint for the first question
         request = self.factory.get(f"/api/questions/{self.question_1.uuid}/")
         response = self.client.get(f"/api/questions/{self.question_1.uuid}/")
-
         # Check that the response has a status code of 200 (OK)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
         # Check that the returned data is what we expect
         serializer = QuestionDetailSerializer(
             instance=Question.objects.prefetch_related("tags", "choices")
@@ -187,17 +183,30 @@ class QuestionViewSetTests(APITestCase):
 
     def test_update(self):
         # Send a PUT request to the update endpoint for the first question
-        response = self.client.put(
-            f"/api/questions/{self.question_1.uuid}/",
-            data={"user": self.user.pk, "title": "What is your age?"},
-        )
-
+        data = {
+            "user": self.user.pk,
+            "title": "What is your age?",
+            "text": "Must be a number",
+            "explanation": "Amount of time that has passed since the birth of a person.",
+            "tags": [
+                {
+                    "slug": self.tag_1.slug,
+                }
+            ],
+        }
+        response = self.client.put(self.detail_url, data, format="json")
         # Check that the response has a status code of 200 (OK)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
         # Check that the question has been updated in the database
         self.question_1.refresh_from_db()
-        self.assertEqual(self.question_1.title, "What is your age?")
+        self.assertEqual(self.question_1.title, data["title"])
+        self.assertEqual(self.question_1.tags.count(), 1)
+
+    def test_update_permissions_anon(self):
+        self.client.logout()
+        data = {"user": self.user.pk, "title": "What is your age?"}
+        response = self.client.post(self.list_url, data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class ChoiceViewSetTests(APITestCase):

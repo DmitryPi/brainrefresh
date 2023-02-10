@@ -34,13 +34,13 @@ class QuestionBaseSerializer(serializers.ModelSerializer):
             "url",
             "uuid",
             "user",
-            "tags",
             "title",
             "text",
             "explanation",
             "language",
             "updated_at",
             "created_at",
+            "tags",
         ]
 
 
@@ -56,12 +56,12 @@ class QuestionListSerializer(QuestionBaseSerializer):
     def create(self, validated_data):
         # pop tags
         tags_data = validated_data.pop("tags", [])
-        tags = [tag["slug"] for tag in tags_data if "slug" in tag]
+        tag_slugs = [tag["slug"] for tag in tags_data if "slug" in tag]
         # create question, filter tags by slugs
         question = Question.objects.create(**validated_data)
-        tags_qs = Tag.objects.filter(slug__in=tags)
+        tags = Tag.objects.filter(slug__in=tag_slugs)
         # set tags if any
-        question.tags.set(tags_qs)
+        question.tags.set(tags)
         return question
 
 
@@ -70,15 +70,28 @@ class QuestionDetailSerializer(QuestionBaseSerializer):
 
     class Meta:
         model = QuestionBaseSerializer.Meta.model
-        fields = QuestionBaseSerializer.Meta.fields + [
+        fields = [
             "choices_url",
-        ]
+        ] + QuestionBaseSerializer.Meta.fields
 
     @extend_schema_field(str)
     def get_choices_url(self, obj):
         return self.context["request"].build_absolute_uri(
             reverse("api:choice-list", kwargs={"question_uuid": obj.uuid})
         )
+
+    def update(self, instance, validated_data):
+        # pop tags
+        tags_data = validated_data.pop("tags", [])
+        print(tags_data)
+        tag_slugs = [tag["slug"] for tag in tags_data if "slug" in tag]
+        # update question
+        question = super().update(instance, validated_data)
+        # filter tags by slugs
+        tags = Tag.objects.filter(slug__in=tag_slugs)
+        # set tags if any
+        question.tags.set(tags)
+        return question
 
 
 class ChoiceListSerializer(serializers.ModelSerializer):
