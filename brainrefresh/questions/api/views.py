@@ -1,4 +1,8 @@
+from django.conf import settings
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.mixins import (
@@ -7,7 +11,12 @@ from rest_framework.mixins import (
     RetrieveModelMixin,
     UpdateModelMixin,
 )
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from .serializers import (
@@ -30,6 +39,20 @@ class TagViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     lookup_field = "slug"
     permission_classes = (AllowAny,)
 
+    @method_decorator(cache_page(settings.API_CACHE_TIME))
+    @method_decorator(vary_on_cookie)
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @method_decorator(cache_page(settings.API_CACHE_TIME))
+    @method_decorator(vary_on_cookie)
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
 
 class QuestionViewSet(
     ListModelMixin,
@@ -39,7 +62,7 @@ class QuestionViewSet(
     GenericViewSet,
 ):
     lookup_field = "uuid"
-    permission_classes = ()
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_fields = ("language",)
     parameters = [

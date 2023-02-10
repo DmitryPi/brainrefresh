@@ -30,7 +30,7 @@ class Tag(models.Model):
         return super().save(*args, **kwargs)
 
     @property
-    def question_count(self):
+    def question_count(self) -> int:
         """Will generate n+1 query - query requires prefetch_related("questions")
         TODO: refactor as service function or smh else
         """

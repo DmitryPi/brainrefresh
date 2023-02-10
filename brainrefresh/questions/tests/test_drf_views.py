@@ -30,17 +30,19 @@ class TagViewSetTests(APITestCase):
     def test_list(self):
         url = reverse("api:tag-list")
         response = self.client.get(url)
-
+        # test response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
 
     def test_retrieve(self):
         url = reverse("api:tag-detail", args=[self.tag_1.slug])
         response = self.client.get(url)
-
+        # test response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["label"], "Test Tag 1")
         self.assertEqual(response.data["slug"], "test-tag-1")
+        self.assertEqual(response.data["question_count"], 0)
+        self.assertIn(url, response.data["url"])
 
 
 class QuestionViewSetTests(APITestCase):

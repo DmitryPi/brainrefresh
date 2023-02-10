@@ -34,6 +34,7 @@ CACHES = {
         },
     }
 }
+API_CACHE_TIME = env("API_CACHE_TIME", default=60 * 60 * 2)  # cache api for n seconds
 
 # SECURITY
 # ------------------------------------------------------------------------------

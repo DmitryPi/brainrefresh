@@ -333,5 +333,10 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "SERVE_PERMISSIONS": ["rest_framework.permissions.IsAdminUser"],
 }
+
+# CACHES
+# ------------------------------------------------------------------------------
+API_CACHE_TIME = env("API_CACHE_TIME", default=60 * 15)
+
 # Your stuff...
 # ------------------------------------------------------------------------------
