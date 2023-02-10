@@ -8,6 +8,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.mixins import (
     CreateModelMixin,
+    DestroyModelMixin,
     ListModelMixin,
     RetrieveModelMixin,
     UpdateModelMixin,
@@ -57,9 +58,10 @@ class TagViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
 
 class QuestionViewSet(
     ListModelMixin,
+    CreateModelMixin,
     RetrieveModelMixin,
     UpdateModelMixin,
-    CreateModelMixin,
+    DestroyModelMixin,
     GenericViewSet,
 ):
     lookup_field = "uuid"
@@ -92,8 +94,8 @@ class QuestionViewSet(
 )
 class ChoiceViewSet(
     ListModelMixin,
-    RetrieveModelMixin,
     CreateModelMixin,
+    RetrieveModelMixin,
     UpdateModelMixin,
     GenericViewSet,
 ):
@@ -114,8 +116,8 @@ class ChoiceViewSet(
 
 class AnswerViewSet(
     ListModelMixin,
-    RetrieveModelMixin,
     CreateModelMixin,
+    RetrieveModelMixin,
     UpdateModelMixin,
     GenericViewSet,
 ):
