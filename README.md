@@ -10,20 +10,13 @@
 ---
 
 - Апи
+    - Ограничения прав обновления для choices
+    - Убрать id (questions/<uuid>/choices/)
     - caching for QuestionViewSet list/retrieve with update on save
-    - question/choices only list, choices/ (cud)
     - Пагинация вопросов
-    - HyperlinkedModelSerializer:
-        You can also use primary key and various other relationships,
-        but hyperlinking is good RESTful design.
-    - rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly
-    - Убрать все id
-    - Добавление модели Answer к пользователю
-    - Добавление модели Quiz с ManyToMany к Question
     - Фильтрация questions по пользователю
     - Фильтрация questions по тегу
-    - Ограничения прав обновления questions и choices для пользователя
-    - API Permissions - it's time
+    - Добавление модели Quiz с ManyToMany к Question
 
 ## Идеи
 
