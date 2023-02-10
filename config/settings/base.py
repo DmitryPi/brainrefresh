@@ -336,7 +336,7 @@ SPECTACULAR_SETTINGS = {
 
 # CACHES
 # ------------------------------------------------------------------------------
-API_CACHE_TIME = env("API_CACHE_TIME", default=60 * 15)
+API_CACHE_TIME = env("API_CACHE_TIME", default=60 * 60)  # cache api for n seconds
 
 # Your stuff...
 # ------------------------------------------------------------------------------

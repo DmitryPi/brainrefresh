@@ -26,23 +26,31 @@ class TagViewSetTests(APITestCase):
         """
         self.tag_1 = TagFactory(label="Test Tag 1")
         self.tag_2 = TagFactory(label="Test Tag 2")
+        self.list_url = reverse("api:tag-list")
+        self.detail_url = reverse("api:tag-detail", args=[self.tag_1.slug])
 
     def test_list(self):
-        url = reverse("api:tag-list")
-        response = self.client.get(url)
+        response = self.client.get(self.list_url)
         # test response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
 
+    def test_list_caching(self):
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.headers["Cache-Control"], "max-age=3600")
+
     def test_retrieve(self):
-        url = reverse("api:tag-detail", args=[self.tag_1.slug])
-        response = self.client.get(url)
+        response = self.client.get(self.detail_url)
         # test response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["label"], "Test Tag 1")
         self.assertEqual(response.data["slug"], "test-tag-1")
         self.assertEqual(response.data["question_count"], 0)
-        self.assertIn(url, response.data["url"])
+        self.assertIn(self.detail_url, response.data["url"])
+
+    def test_retrieve_caching(self):
+        response = self.client.get(self.detail_url)
+        self.assertEqual(response.headers["Cache-Control"], "max-age=3600")
 
 
 class QuestionViewSetTests(APITestCase):
