@@ -9,16 +9,23 @@ from ..models import Answer, Choice, Question, Tag
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ["label", "slug", "question_count", "url"]
+        fields = ["url", "label", "slug", "question_count"]
         extra_kwargs = {"url": {"view_name": "api:tag-detail", "lookup_field": "slug"}}
 
 
-class QuestionListSerializer(serializers.HyperlinkedModelSerializer):
+class _QuestionTagSerializer(serializers.Serializer):
+    label = serializers.CharField(required=False)
+    slug = serializers.SlugField()
+
+
+class QuestionListSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    tags = _QuestionTagSerializer(Tag.objects.all(), many=True, required=False)
 
     class Meta:
         model = Question
         fields = [
+            "url",
             "uuid",
             "user",
             "tags",
@@ -26,12 +33,21 @@ class QuestionListSerializer(serializers.HyperlinkedModelSerializer):
             "language",
             "updated_at",
             "created_at",
-            "url",
         ]
         extra_kwargs = {
             "url": {"view_name": "api:question-detail", "lookup_field": "uuid"},
-            "tags": {"view_name": "api:tag-detail", "lookup_field": "slug"},
         }
+
+    def create(self, validated_data):
+        # pop tags
+        tags_data = validated_data.pop("tags", [])
+        tags = [tag["slug"] for tag in tags_data if "slug" in tag]
+        # create question, filter tags by slugs
+        question = Question.objects.create(**validated_data)
+        tags_qs = Tag.objects.filter(slug__in=tags)
+        # set tags if any
+        question.tags.set(tags_qs)
+        return question
 
 
 class QuestionDetailSerializer(serializers.ModelSerializer):

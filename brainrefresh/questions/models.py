@@ -32,7 +32,7 @@ class Tag(models.Model):
     @property
     def question_count(self) -> int:
         """Will generate n+1 query - query requires prefetch_related("questions")
-        TODO: refactor as service function or smh else
+        TODO: refactor as service function or smh else, set .published()
         """
         return self.questions.count()
 

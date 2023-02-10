@@ -63,6 +63,8 @@ class QuestionViewSetTests(APITestCase):
         # Create a client to make API requests
         self.client = APIClient()
         self.client.login(**self.user_log_pass)
+        # urls
+        self.list_url = reverse("api:question-list")
 
         # Create some data for testing
         self.question_1 = QuestionFactory(
@@ -77,17 +79,17 @@ class QuestionViewSetTests(APITestCase):
             title="What is your favorite food?",
             published=False,
         )
-        self.tag1 = TagFactory(label="personal")
-        self.tag2 = TagFactory(label="favorites")
-        self.question_1.tags.add(self.tag1, self.tag2)
-        self.question_2.tags.add(self.tag2)
+        self.tag_1 = TagFactory(label="personal", slug="personal-1")
+        self.tag_2 = TagFactory(label="favorites")
+        self.question_1.tags.add(self.tag_1, self.tag_2)
+        self.question_2.tags.add(self.tag_2)
         self.choice1 = ChoiceFactory(question=self.question_1, text="John")
         self.choice2 = ChoiceFactory(question=self.question_1, text="Jane")
 
     def test_list(self):
         # Send a GET request to the list endpoint
-        request = self.factory.get("/api/questions/")
-        response = self.client.get("/api/questions/")
+        request = self.factory.get(self.list_url)
+        response = self.client.get(self.list_url)
 
         # Check that the response has a status code of 200 (OK)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -99,6 +101,36 @@ class QuestionViewSetTests(APITestCase):
             context={"request": request},
         )
         self.assertEqual(response.data, serializer.data)
+
+    def test_create(self):
+        # Send a POST request to the create endpoint
+        data = {
+            "user": self.user.pk,
+            "title": "What is your address?",
+            "tags": [
+                {"slug": self.tag_1.slug},
+                {"slug": self.tag_2.slug, "label": "123"},
+            ],
+            "is_published": True,
+        }
+        data_1 = {
+            "user": self.user.pk,
+            "title": "What is your name?",
+            "language": "RU",
+        }
+        response = self.client.post(self.list_url, data, format="json")
+        response_1 = self.client.post(self.list_url, data_1)
+        print(response.content)
+        print(response.content)
+        # Check that the response has a status code of 201 (Created)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response_1.status_code, status.HTTP_201_CREATED)
+        # Check that the new question has been created in the database
+        self.assertTrue(Question.objects.filter(title=data["title"]).exists())
+        self.assertTrue(Question.objects.filter(title=data_1["title"]).exists())
+        # Check that tags were added
+        self.assertTrue(len(response.data["tags"]), 2)
+        self.assertFalse(len(response_1.data["tags"]))
 
     def test_retrieve(self):
         # Send a GET request to the retrieve endpoint for the first question
@@ -130,23 +162,6 @@ class QuestionViewSetTests(APITestCase):
         # Check that the question has been updated in the database
         self.question_1.refresh_from_db()
         self.assertEqual(self.question_1.title, "What is your age?")
-
-    def test_create(self):
-        # Send a POST request to the create endpoint
-        response = self.client.post(
-            "/api/questions/",
-            data={
-                "user": self.user.pk,
-                "title": "What is your address?",
-                "is_published": True,
-            },
-        )
-
-        # Check that the response has a status code of 201 (Created)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        # Check that the new question has been created in the database
-        self.assertTrue(Question.objects.filter(title="What is your address?").exists())
 
 
 class ChoiceViewSetTests(APITestCase):
