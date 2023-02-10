@@ -20,6 +20,7 @@ class Tag(models.Model):
     class Meta:
         verbose_name = _("Tag")
         verbose_name_plural = _("Tags")
+        ordering = ["label"]
 
     def __str__(self):
         return self.label
@@ -62,6 +63,7 @@ class Question(models.Model):
     class Meta:
         verbose_name = _("Question")
         verbose_name_plural = _("Questions")
+        ordering = ["-created_at"]
 
     def __str__(self):
         return self.title
