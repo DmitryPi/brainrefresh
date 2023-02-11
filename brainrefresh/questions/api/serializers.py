@@ -94,6 +94,11 @@ class QuestionDetailSerializer(QuestionBaseSerializer):
         ]
 
     def update(self, instance, validated_data):
+        request = self.context.get("request")
+
+        if not request.user.is_staff and instance.user != request.user:
+            raise serializers.ValidationError("You can only update your own questions.")
+
         # pop tags
         tags_data = validated_data.pop("tags", [])
         tag_slugs = [tag["slug"] for tag in tags_data if "slug" in tag]

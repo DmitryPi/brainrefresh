@@ -76,23 +76,26 @@ class TagViewSetTests(APITestCase):
 class QuestionViewSetTests(APITestCase):
     def setUp(self):
         # Create a user to use for authentication
-        self.user_log_pass = {"username": "testuser", "password": "testpassword"}
-        self.user = UserFactory(**self.user_log_pass)
+        self.user = UserFactory()
+        self.user_1 = UserFactory()
+        self.user_admin = SuperUserFactory()
         # Create request factory
         self.factory = APIRequestFactory()
         # Create a client to make API requests
         self.client = APIClient()
-        self.client.login(**self.user_log_pass)
         # Create some data for testing
         self.question_1 = QuestionFactory(
+            user=self.user,
             title="What is your name?",
             published=True,
         )
         self.question_2 = QuestionFactory(
+            user=self.user,
             title="What is your favorite color?",
             published=True,
         )
         self.question_3 = QuestionFactory(
+            user=self.user,
             title="What is your favorite food?",
             published=False,
         )
@@ -109,7 +112,6 @@ class QuestionViewSetTests(APITestCase):
         )
         # test question data
         self.q_data = {
-            "user": self.user.pk,
             "title": "What is your address?",
             "tags": [
                 {"slug": self.tag_1.slug},
@@ -117,12 +119,22 @@ class QuestionViewSetTests(APITestCase):
             ],
         }
         self.q_data_1 = {
-            "user": self.user.pk,
             "title": "What is your name?",
             "language": "RU",
         }
+        self.q_update_data = {
+            "title": "What is your age?",
+            "text": "Must be a number",
+            "explanation": "Amount of time that has passed since the birth of a person.",
+            "tags": [
+                {
+                    "slug": self.tag_1.slug,
+                }
+            ],
+        }
 
     def test_list(self):
+        self.client.force_login(self.user)
         # Send a GET request to the list endpoint
         request = self.factory.get(self.list_url)
         response = self.client.get(self.list_url)
@@ -137,11 +149,11 @@ class QuestionViewSetTests(APITestCase):
         self.assertEqual(response.data, serializer.data)
 
     def test_list_anon(self):
-        self.client.logout()
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_create(self):
+        self.client.force_login(self.user)
         # Send a POST request to the create endpoint
         response = self.client.post(self.list_url, self.q_data, format="json")
         response_1 = self.client.post(self.list_url, self.q_data_1, format="json")
@@ -161,6 +173,7 @@ class QuestionViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_retrieve(self):
+        self.client.force_login(self.user)
         # Send a GET request to the retrieve endpoint for the first question
         request = self.factory.get(f"/api/questions/{self.question_1.uuid}/")
         response = self.client.get(f"/api/questions/{self.question_1.uuid}/")
@@ -176,48 +189,51 @@ class QuestionViewSetTests(APITestCase):
         self.assertEqual(response.data, serializer.data)
 
     def test_retrieve_anon(self):
-        self.client.logout()
         response = self.client.get(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update(self):
-        """
-        TODO: check if another user can't update object of the user
-        """
+        self.client.force_login(self.user)
         # Send a PUT request to the update endpoint for the first question
-        data = {
-            "user": self.user.pk,
-            "title": "What is your age?",
-            "text": "Must be a number",
-            "explanation": "Amount of time that has passed since the birth of a person.",
-            "tags": [
-                {
-                    "slug": self.tag_1.slug,
-                }
-            ],
-        }
-        response = self.client.put(self.detail_url, data, format="json")
+        response = self.client.put(self.detail_url, self.q_update_data, format="json")
         # Check that the response has a status code of 200 (OK)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Check that the question has been updated in the database
         self.question_1.refresh_from_db()
-        self.assertEqual(self.question_1.title, data["title"])
+        self.assertEqual(self.question_1.title, self.q_update_data["title"])
         self.assertEqual(self.question_1.tags.count(), 1)
 
     def test_update_anon(self):
-        self.client.logout()
         data = {"user": self.user.pk, "title": "What is your age?"}
-        response = self.client.post(self.list_url, data)
+        response = self.client.put(self.detail_url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_admin_can_update_for_other_users(self):
+        self.client.force_login(self.user_admin)
+        # Send a PUT request to the update endpoint for the first question
+        response = self.client.put(self.detail_url, self.q_update_data, format="json")
+        # Check that the response has a status code of 200 (OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Check that the question has been updated in the database
+        self.question_1.refresh_from_db()
+        self.assertEqual(self.question_1.title, self.q_update_data["title"])
+        self.assertEqual(self.question_1.tags.count(), 1)
+
+    def test_user_cant_update_for_other_users(self):
+        self.client.force_login(self.user_1)
+        # Send a PUT request to the update endpoint for the first question
+        response = self.client.put(self.detail_url, self.q_update_data, format="json")
+        # Check that the response has a status code of 200 (OK)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_destroy(self):
+        self.client.force_login(self.user)
         # Send a DELETE request to the destroy endpoint for the first question
         response = self.client.delete(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Question.objects.filter(uuid=self.question_1.uuid).exists())
 
     def test_destroy_anon(self):
-        self.client.logout()
         response = self.client.delete(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertTrue(Question.objects.filter(uuid=self.question_1.uuid).exists())
