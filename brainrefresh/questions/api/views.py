@@ -98,6 +98,7 @@ class ChoiceViewSet(
     CreateModelMixin,
     RetrieveModelMixin,
     UpdateModelMixin,
+    DestroyModelMixin,
     GenericViewSet,
 ):
     lookup_field = "uuid"
@@ -113,6 +114,14 @@ class ChoiceViewSet(
     def get_queryset(self):
         queryset = Choice.objects.select_related("question")
         return queryset
+
+    def perform_destroy(self, instance):
+        if (
+            not self.request.user.is_staff
+            and instance.question.user != self.request.user
+        ):
+            raise PermissionDenied("You can only delete your own questions.")
+        instance.delete()
 
 
 class AnswerViewSet(

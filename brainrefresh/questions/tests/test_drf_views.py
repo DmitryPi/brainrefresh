@@ -388,6 +388,33 @@ class ChoiceViewSetTests(APITestCase):
         # Test response and data change
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_destroy(self):
+        self.client.force_login(self.user)
+        # Send a DELETE request to the destroy endpoint for the first question
+        response = self.client.delete(self.detail_url)
+        # Test response and data change
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Choice.objects.filter(uuid=self.choices[0].uuid).exists())
+
+    def test_admin_can_destroy_for_other_users(self):
+        self.client.force_login(self.user_admin)
+        # Send a DELETE request to the destroy endpoint for the first question
+        response = self.client.delete(self.detail_url)
+        # Test response and data change
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Choice.objects.filter(uuid=self.choices[0].uuid).exists())
+
+    def test_user_cant_destroy_for_other_users(self):
+        self.client.force_login(self.user_1)
+        # Send a DELETE request to the destroy endpoint for the first question
+        response = self.client.delete(self.detail_url)
+        # Test response and data change
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_destroy_anon(self):
+        response = self.client.delete(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
 
 class AnswerViewSetTests(APITestCase):
     def setUp(self):
