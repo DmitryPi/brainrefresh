@@ -14,6 +14,7 @@
     - Убрать id (questions/<uuid>/choices/)
     - caching for QuestionViewSet list/retrieve with update on save
     - Пагинация вопросов
+    - partial_update для QuestionViewSet
     - Фильтрация questions по пользователю
     - Фильтрация questions по тегу
     - Добавление модели Quiz с ManyToMany к Question
