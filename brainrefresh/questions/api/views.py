@@ -4,7 +4,6 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import OpenApiParameter
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.mixins import (
     CreateModelMixin,
     DestroyModelMixin,
@@ -32,6 +31,7 @@ from .serializers import (
     Tag,
     TagSerializer,
 )
+from .validators import compare_users_and_restrict
 
 
 class TagViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
@@ -88,8 +88,7 @@ class QuestionViewSet(
         return query.published()
 
     def perform_destroy(self, instance):
-        if not self.request.user.is_staff and instance.user != self.request.user:
-            raise PermissionDenied("You can only delete your own questions.")
+        compare_users_and_restrict(self.request.user, instance.user, call_from="view")
         instance.delete()
 
 
@@ -116,11 +115,9 @@ class ChoiceViewSet(
         return queryset
 
     def perform_destroy(self, instance):
-        if (
-            not self.request.user.is_staff
-            and instance.question.user != self.request.user
-        ):
-            raise PermissionDenied("You can only delete your own questions.")
+        compare_users_and_restrict(
+            self.request.user, instance.question.user, call_from="view"
+        )
         instance.delete()
 
 

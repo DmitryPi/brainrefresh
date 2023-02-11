@@ -5,6 +5,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from ..models import Answer, Choice, Question, Tag
+from .validators import compare_users_and_restrict
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -95,10 +96,8 @@ class QuestionDetailSerializer(QuestionBaseSerializer):
 
     def update(self, instance, validated_data):
         request = self.context.get("request")
-
-        if not request.user.is_staff and instance.user != request.user:
-            raise serializers.ValidationError("You can only update your own questions.")
-
+        # permission check
+        compare_users_and_restrict(request.user, instance.user)
         # pop tags
         tags_data = validated_data.pop("tags", [])
         tag_slugs = [tag["slug"] for tag in tags_data if "slug" in tag]
@@ -132,20 +131,18 @@ class ChoiceSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context.get("request")
         question = validated_data.get("question")
-
-        if not request.user.is_staff and question.user != request.user:
-            raise serializers.ValidationError("You can only update your own questions.")
-
+        # permission check
+        compare_users_and_restrict(request.user, question.user)
+        # create call
         choice = Choice.objects.create(**validated_data)
         return choice
 
     def update(self, instance, validated_data):
         request = self.context.get("request")
         question = validated_data.get("question")
-
-        if not request.user.is_staff and question.user != request.user:
-            raise serializers.ValidationError("You can only update your own choices.")
-
+        # permission check
+        compare_users_and_restrict(request.user, question.user)
+        # update call
         choice = super().update(instance, validated_data)
         return choice
 
