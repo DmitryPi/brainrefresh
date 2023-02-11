@@ -125,7 +125,6 @@ class AnswerViewSet(
     ListModelMixin,
     CreateModelMixin,
     RetrieveModelMixin,
-    UpdateModelMixin,
     GenericViewSet,
 ):
     serializer_class = AnswerSerializer

@@ -91,10 +91,6 @@ class Choice(models.Model):
 
 
 class Answer(models.Model):
-    """
-    TODO: choices question validation (prevent adding choices from another question)
-    """
-
     # related fields
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="%(class)ss")
     question = models.ForeignKey(
