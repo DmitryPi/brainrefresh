@@ -4,6 +4,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import OpenApiParameter
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.mixins import (
     CreateModelMixin,
     DestroyModelMixin,
@@ -85,6 +86,11 @@ class QuestionViewSet(
         if self.action in ["retrieve", "update"]:
             query = query.prefetch_related("choices")
         return query.published()
+
+    def perform_destroy(self, instance):
+        if not self.request.user.is_staff and instance.user != self.request.user:
+            raise PermissionDenied("You can only delete your own questions.")
+        instance.delete()
 
 
 class ChoiceViewSet(
