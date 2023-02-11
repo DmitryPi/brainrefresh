@@ -125,7 +125,12 @@ class ChoiceSerializer(serializers.ModelSerializer):
         return request.build_absolute_uri(rev)
 
     def create(self, validated_data):
-        """TODO: check if choice in user created question"""
+        request = self.context.get("request")
+        question = validated_data.get("question")
+
+        if not request.user.is_staff and question.user != request.user:
+            raise serializers.ValidationError("You can only update your own questions.")
+
         choice = Choice.objects.create(**validated_data)
         return choice
 

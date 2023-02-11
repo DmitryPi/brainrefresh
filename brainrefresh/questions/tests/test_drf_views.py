@@ -8,6 +8,7 @@ from brainrefresh.users.tests.factories import SuperUserFactory, UserFactory
 from ..api.serializers import QuestionDetailSerializer, QuestionListSerializer
 from .factories import (
     AnswerFactory,
+    Choice,
     ChoiceFactory,
     Question,
     QuestionFactory,
@@ -226,6 +227,7 @@ class ChoiceViewSetTests(APITestCase):
     def setUp(self):
         # Create User objects
         self.user = UserFactory()
+        self.user_1 = UserFactory()
         self.user_admin = SuperUserFactory()
         # Create a client to make API requests
         self.client = APIClient()
@@ -233,6 +235,7 @@ class ChoiceViewSetTests(APITestCase):
         self.question = QuestionFactory(
             user=self.user, title="What is the meaning of life?"
         )
+        self.question_1 = QuestionFactory(user=self.user_1, title="What is Python?")
         self.question_by_admin = QuestionFactory(user=self.user_admin)
         self.choices = [
             ChoiceFactory(
@@ -289,6 +292,25 @@ class ChoiceViewSetTests(APITestCase):
     def test_create_anon(self):
         response = self.client.post(self.list_url, self.choice_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admin_can_create_for_other_users(self):
+        self.client.force_login(self.user_admin)
+        # Make a POST request to the endpoint
+        response = self.client.post(self.list_url, self.choice_data, format="json")
+        choices = Choice.objects.filter(question__uuid=self.question.uuid).count()
+        # Test response and if question choices were updated
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(choices, 4)
+
+    def test_user_cant_create_for_other_users(self):
+        """Test prevention of {self.user_1} from modifying resources of {self.user}"""
+        self.client.force_login(self.user_1)
+        # Make a POST request to the endpoint
+        response = self.client.post(self.list_url, self.choice_data, format="json")
+        choices = Choice.objects.filter(question__uuid=self.question.uuid).count()
+        # Test response and if question choices were updated
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(choices, 3)
 
     def test_retrieve(self):
         self.client.force_login(self.user)

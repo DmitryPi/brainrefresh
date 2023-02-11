@@ -10,15 +10,12 @@
 ---
 
 - Апи
-    - Тестирование обновленного ChoiceViewSet
-        - Ответ
-        - Права
-        - Кеширование
     - caching for QuestionViewSet list/retrieve with update on save
     - Пагинация вопросов
     - partial_update для QuestionViewSet
     - Фильтрация questions по пользователю
     - Фильтрация questions по тегу
+    - Тест фильтрации, пагинации, порядка
     - Добавление модели Quiz с ManyToMany к Question
 
 ## Идеи
