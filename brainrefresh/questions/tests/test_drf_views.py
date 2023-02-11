@@ -180,6 +180,9 @@ class QuestionViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update(self):
+        """
+        TODO: check if another user can't update object of the user
+        """
         # Send a PUT request to the update endpoint for the first question
         data = {
             "user": self.user.pk,
@@ -227,7 +230,10 @@ class ChoiceViewSetTests(APITestCase):
         # Create a client to make API requests
         self.client = APIClient()
         # Create a Question and Choices mock data
-        self.question = QuestionFactory(title="What is the meaning of life?")
+        self.question = QuestionFactory(
+            user=self.user, title="What is the meaning of life?"
+        )
+        self.question_by_admin = QuestionFactory(user=self.user_admin)
         self.choices = [
             ChoiceFactory(
                 question=self.question, text="To find happiness", is_correct=True
@@ -241,6 +247,15 @@ class ChoiceViewSetTests(APITestCase):
         ]
         # urls
         self.list_url = reverse("api:choice-list")
+        self.detail_url = reverse(
+            "api:choice-detail", kwargs={"uuid": self.choices[0].uuid}
+        )
+        # data
+        self.choice_data = {
+            "question": str(self.question.uuid),
+            "text": "A framework",
+            "is_correct": False,
+        }
 
     def test_list(self):
         self.client.force_login(self.user_admin)
@@ -262,36 +277,35 @@ class ChoiceViewSetTests(APITestCase):
         # Test response
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    # def test_retrieve(self):
-    #     # Get the URL for the ChoiceViewSet retrieve endpoint for the first choice
-    #     url = reverse(
-    #         "api:choice-detail",
-    #         kwargs={
-    #             "question_uuid": str(self.question.uuid),
-    #             "uuid": str(self.choices[0].uuid),
-    #         },
-    #     )
-    #     # Make a GET request to the endpoint
-    #     response = self.client.get(url)
-    #     # Assert that the response status code is 200 OK
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     # Assert that the data returned in the response matches the data for the first choice
-    #     self.assertEqual(response.data["text"], self.choices[0].text)
+    def test_create(self):
+        self.client.force_login(self.user)
+        # Make a POST request to the endpoint
+        response = self.client.post(self.list_url, self.choice_data, format="json")
+        # Test response
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["text"], self.choice_data["text"])
+        self.assertEqual(response.data["is_correct"], self.choice_data["is_correct"])
 
-    # def test_create(self):
-    #     # Create a new choice
-    #     url = reverse(
-    #         "api:choice-list", kwargs={"question_uuid": str(self.question.uuid)}
-    #     )
-    #     data = {
-    #         "question": self.question.pk,
-    #         "text": "A framework",
-    #         "is_correct": False,
-    #     }
-    #     response = self.client.post(url, data, format="json")
-    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    #     self.assertEqual(response.data["text"], data["text"])
-    #     self.assertEqual(response.data["is_correct"], data["is_correct"])
+    def test_create_anon(self):
+        response = self.client.post(self.list_url, self.choice_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_retrieve(self):
+        self.client.force_login(self.user)
+        # Make a GET request to the endpoint
+        response = self.client.get(self.detail_url)
+        # Test response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            list(response.data.keys()),
+            ["url", "uuid", "question", "question_url", "text", "is_correct"],
+        )
+        self.assertEqual(response.data["uuid"], str(self.choices[0].uuid))
+
+    def test_retrieve_anon(self):
+        response = self.client.get(self.detail_url)
+        # Test response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     # def test_update(self):
     #     # Update an existing choice

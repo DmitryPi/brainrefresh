@@ -96,7 +96,6 @@ class ChoiceViewSet(
 ):
     lookup_field = "uuid"
     serializer_class = ChoiceSerializer
-    queryset = Choice.objects.all()
 
     def get_permissions(self):
         if self.action == "list":
@@ -104,6 +103,10 @@ class ChoiceViewSet(
         else:
             permission_classes = [IsAuthenticatedOrReadOnly]
         return [permission() for permission in permission_classes]
+
+    def get_queryset(self):
+        queryset = Choice.objects.select_related("question")
+        return queryset
 
 
 class AnswerViewSet(

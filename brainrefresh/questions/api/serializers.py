@@ -1,4 +1,7 @@
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from ..models import Answer, Choice, Question, Tag
@@ -17,6 +20,24 @@ class _QuestionTagSerializer(serializers.Serializer):
     )
     label = serializers.CharField(read_only=True)
     slug = serializers.SlugField()
+
+
+class _QuestionChoiceSerializer(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(
+        view_name="api:choice-detail", lookup_field="uuid"
+    )
+
+    class Meta:
+        model = Choice
+        fields = [
+            "url",
+            "uuid",
+            "text",
+            "is_correct",
+        ]
+        extra_kwargs = {
+            "is_correct": {"write_only": True},
+        }
 
 
 class QuestionBaseSerializer(serializers.ModelSerializer):
@@ -63,24 +84,6 @@ class QuestionListSerializer(QuestionBaseSerializer):
         return question
 
 
-class _QuestionChoiceSerializer(serializers.ModelSerializer):
-    url = serializers.HyperlinkedIdentityField(
-        view_name="api:choice-detail", lookup_field="uuid"
-    )
-
-    class Meta:
-        model = Choice
-        fields = [
-            "url",
-            "uuid",
-            "text",
-            "is_correct",
-        ]
-        extra_kwargs = {
-            "is_correct": {"write_only": True},
-        }
-
-
 class QuestionDetailSerializer(QuestionBaseSerializer):
     choices = _QuestionChoiceSerializer(many=True, read_only=True)
 
@@ -94,9 +97,8 @@ class QuestionDetailSerializer(QuestionBaseSerializer):
         # pop tags
         tags_data = validated_data.pop("tags", [])
         tag_slugs = [tag["slug"] for tag in tags_data if "slug" in tag]
-        # update question
+        # update question, filter tags by slugs
         question = super().update(instance, validated_data)
-        # filter tags by slugs
         tags = Tag.objects.filter(slug__in=tag_slugs)
         # set tags if any
         question.tags.set(tags)
@@ -104,13 +106,28 @@ class QuestionDetailSerializer(QuestionBaseSerializer):
 
 
 class ChoiceSerializer(serializers.ModelSerializer):
-    question = serializers.HyperlinkedRelatedField(
-        view_name="api:question-detail", lookup_field="uuid", read_only=True
+    url = serializers.HyperlinkedIdentityField(
+        view_name="api:choice-detail", lookup_field="uuid"
+    )
+    question_url = serializers.SerializerMethodField()
+    question = serializers.SlugRelatedField(
+        slug_field="uuid", queryset=Question.objects.all()
     )
 
     class Meta:
         model = Choice
-        fields = ["uuid", "question", "text", "is_correct"]
+        fields = ["url", "uuid", "question", "question_url", "text", "is_correct"]
+
+    @extend_schema_field(OpenApiTypes.URI)
+    def get_question_url(self, obj):
+        request = self.context.get("request")
+        rev = reverse("api:question-detail", kwargs={"uuid": obj.question.uuid})
+        return request.build_absolute_uri(rev)
+
+    def create(self, validated_data):
+        """TODO: check if choice in user created question"""
+        choice = Choice.objects.create(**validated_data)
+        return choice
 
 
 class _AnswerChoiceSerializer(serializers.ModelSerializer):
