@@ -221,6 +221,11 @@ class QuestionViewSetTests(APITestCase):
 
 class ChoiceViewSetTests(APITestCase):
     def setUp(self):
+        # Create User objects
+        self.user = UserFactory()
+        self.user_admin = SuperUserFactory()
+        # Create a client to make API requests
+        self.client = APIClient()
         # Create a Question and Choices mock data
         self.question = QuestionFactory(title="What is the meaning of life?")
         self.choices = [
@@ -234,18 +239,28 @@ class ChoiceViewSetTests(APITestCase):
                 question=self.question, text="To seek knowledge", is_correct=False
             ),
         ]
+        # urls
+        self.list_url = reverse("api:choice-list")
 
-    # def test_list(self):
-    #     # Get the URL for the ChoiceViewSet list endpoint
-    #     url = reverse(
-    #         "api:choice-list", kwargs={"question_uuid": str(self.question.uuid)}
-    #     )
-    #     # Make a GET request to the endpoint
-    #     response = self.client.get(url)
-    #     # Assert that the response status code is 200 OK
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     # Assert that the number of choices returned in the response is the same as the number of choices created
-    #     self.assertEqual(len(response.data), 3)
+    def test_list(self):
+        self.client.force_login(self.user_admin)
+        # Make a GET request to the endpoint
+        response = self.client.get(self.list_url)
+        # Test response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 3)
+
+    def test_list_permissions_user(self):
+        self.client.force_login(self.user)
+        # Make a GET request to the endpoint
+        response = self.client.get(self.list_url)
+        # Test response
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_list_permissions_admin(self):
+        response = self.client.get(self.list_url)
+        # Test response
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     # def test_retrieve(self):
     #     # Get the URL for the ChoiceViewSet retrieve endpoint for the first choice
@@ -321,7 +336,7 @@ class AnswerViewSetTests(APITestCase):
             "password": "testpassword",
         }
         self.user = UserFactory(**self.user_log_pass)
-        self.user_1 = SuperUserFactory()
+        self.user_admin = SuperUserFactory()
         # Create Question
         self.question = QuestionFactory(
             title="What is Django?", text="Django is a high-level Python web framework"
@@ -340,7 +355,9 @@ class AnswerViewSetTests(APITestCase):
         self.answers = [
             AnswerFactory(question=self.question, user=self.user, is_correct=True),
             AnswerFactory(question=self.question, user=self.user, is_correct=True),
-            AnswerFactory(question=self.question, user=self.user_1, is_correct=True),
+            AnswerFactory(
+                question=self.question, user=self.user_admin, is_correct=True
+            ),
         ]
         # Create request factory
         self.factory = APIRequestFactory()
@@ -359,7 +376,7 @@ class AnswerViewSetTests(APITestCase):
         # Test correct list of answers for request.user
         users = [
             {"instance": self.user, "answers_len": 2},
-            {"instance": self.user_1, "answers_len": 1},
+            {"instance": self.user_admin, "answers_len": 1},
         ]
         for user in users:
             # Login user
@@ -378,7 +395,7 @@ class AnswerViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_list_permissions_admin(self):
-        self.client.force_login(self.user_1)
+        self.client.force_login(self.user_admin)
         response = self.client.get(self.answer_list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -406,7 +423,7 @@ class AnswerViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_retrieve_permissions_admin(self):
-        self.client.force_login(self.user_1)
+        self.client.force_login(self.user_admin)
         response = self.client.get(self.answer_detail_url_admin)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
