@@ -1,6 +1,6 @@
 from django.urls import resolve, reverse
 
-from ..models import Answer, Question, Tag
+from ..models import Answer, Choice, Question, Tag
 
 
 def test_tag_list():
@@ -25,10 +25,16 @@ def test_question_detail(question: Question):
     assert resolve(url).view_name == "api:question-detail"
 
 
-def test_choice_list(question: Question):
-    url = f"/api/questions/{question.uuid}/choices/"
-    assert reverse("api:choice-list", kwargs={"question_uuid": question.uuid}) == url
+def test_choice_list():
+    url = "/api/choices/"
+    assert reverse("api:choice-list") == url
     assert resolve(url).view_name == "api:choice-list"
+
+
+def test_choice_detail(choice: Choice):
+    url = f"/api/choices/{choice.uuid}/"
+    assert reverse("api:choice-detail", kwargs={"uuid": choice.uuid}) == url
+    assert resolve(url).view_name == "api:choice-detail"
 
 
 def test_answer_list():

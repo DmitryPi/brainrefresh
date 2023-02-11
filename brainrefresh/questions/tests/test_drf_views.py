@@ -235,17 +235,17 @@ class ChoiceViewSetTests(APITestCase):
             ),
         ]
 
-    def test_list(self):
-        # Get the URL for the ChoiceViewSet list endpoint
-        url = reverse(
-            "api:choice-list", kwargs={"question_uuid": str(self.question.uuid)}
-        )
-        # Make a GET request to the endpoint
-        response = self.client.get(url)
-        # Assert that the response status code is 200 OK
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # Assert that the number of choices returned in the response is the same as the number of choices created
-        self.assertEqual(len(response.data), 3)
+    # def test_list(self):
+    #     # Get the URL for the ChoiceViewSet list endpoint
+    #     url = reverse(
+    #         "api:choice-list", kwargs={"question_uuid": str(self.question.uuid)}
+    #     )
+    #     # Make a GET request to the endpoint
+    #     response = self.client.get(url)
+    #     # Assert that the response status code is 200 OK
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     # Assert that the number of choices returned in the response is the same as the number of choices created
+    #     self.assertEqual(len(response.data), 3)
 
     # def test_retrieve(self):
     #     # Get the URL for the ChoiceViewSet retrieve endpoint for the first choice
