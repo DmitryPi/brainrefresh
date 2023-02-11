@@ -78,10 +78,13 @@ class Choice(models.Model):
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
     text = models.TextField()
     is_correct = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = _("Choice")
         verbose_name_plural = _("Choice")
+        ordering = ["-created_at"]
 
     def __str__(self):
         return f"{self.question.title} : {str(self.uuid)}"

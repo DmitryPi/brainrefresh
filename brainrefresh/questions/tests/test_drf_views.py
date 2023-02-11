@@ -359,39 +359,34 @@ class ChoiceViewSetTests(APITestCase):
         # Test response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    # def test_update(self):
-    #     # Update an existing choice
-    #     url = reverse(
-    #         "api:choice-detail",
-    #         kwargs={
-    #             "question_uuid": str(self.question.uuid),
-    #             "uuid": str(self.choices[0].uuid),
-    #         },
-    #     )
-    #     data = {
-    #         "question": self.question.pk,
-    #         "text": "A language",
-    #         "is_correct": False,
-    #     }
-    #     response = self.client.put(url, data, format="json")
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     self.assertEqual(response.data["text"], data["text"])
-    #     self.assertEqual(response.data["is_correct"], data["is_correct"])
+    def test_update(self):
+        self.client.force_login(self.user)
+        # Update an existing choice
+        response = self.client.put(self.detail_url, self.choice_data, format="json")
+        # Test response and data change
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["text"], self.choice_data["text"])
+        self.assertTrue(Choice.objects.filter(text=self.choice_data["text"]).exists())
 
-    # def test_get_queryset(self):
-    #     # Get the URL for the ChoiceViewSet retrieve endpoint for a choice with a non-existing UUID
-    #     non_existing_uuid = str(uuid4())
-    #     url = reverse(
-    #         "api:choice-detail",
-    #         kwargs={
-    #             "question_uuid": str(self.question.uuid),
-    #             "uuid": non_existing_uuid,
-    #         },
-    #     )
-    #     # Make a GET request to the endpoint
-    #     response = self.client.get(url)
-    #     # Assert that the response status code is 404 Not Found
-    #     self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+    def test_update_anon(self):
+        response = self.client.put(self.detail_url, self.choice_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admin_can_update_for_other_users(self):
+        self.client.force_login(self.user_admin)
+        # Update an existing choice
+        response = self.client.put(self.detail_url, self.choice_data, format="json")
+        # Test response and data change
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["text"], self.choice_data["text"])
+        self.assertTrue(Choice.objects.filter(text=self.choice_data["text"]).exists())
+
+    def test_user_cant_update_for_other_users(self):
+        self.client.force_login(self.user_1)
+        # Update an existing choice
+        response = self.client.put(self.detail_url, self.choice_data, format="json")
+        # Test response and data change
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class AnswerViewSetTests(APITestCase):

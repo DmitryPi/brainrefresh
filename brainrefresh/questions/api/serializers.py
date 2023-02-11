@@ -139,6 +139,16 @@ class ChoiceSerializer(serializers.ModelSerializer):
         choice = Choice.objects.create(**validated_data)
         return choice
 
+    def update(self, instance, validated_data):
+        request = self.context.get("request")
+        question = validated_data.get("question")
+
+        if not request.user.is_staff and question.user != request.user:
+            raise serializers.ValidationError("You can only update your own choices.")
+
+        choice = super().update(instance, validated_data)
+        return choice
+
 
 class _AnswerChoiceSerializer(serializers.ModelSerializer):
     """Used for serializing Answer model choices field"""
