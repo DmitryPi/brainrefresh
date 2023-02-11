@@ -35,12 +35,12 @@ class TagViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
 
-    def test_list_permissions_user(self):
+    def test_list_user(self):
         self.client.force_login(self.user)
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_list_permissions_anon(self):
+    def test_list_anon(self):
         self.client.logout()
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -58,12 +58,12 @@ class TagViewSetTests(APITestCase):
         self.assertEqual(response.data["question_count"], 0)
         self.assertIn(self.detail_url, response.data["url"])
 
-    def test_retrieve_permissions_user(self):
+    def test_retrieve_user(self):
         self.client.force_login(self.user)
         response = self.client.get(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_retrieve_permissions_anon(self):
+    def test_retrieve_anon(self):
         self.client.logout()
         response = self.client.get(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -136,7 +136,7 @@ class QuestionViewSetTests(APITestCase):
         )
         self.assertEqual(response.data, serializer.data)
 
-    def test_list_permissions_anon(self):
+    def test_list_anon(self):
         self.client.logout()
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -155,7 +155,7 @@ class QuestionViewSetTests(APITestCase):
         self.assertTrue(len(response.data["tags"]), 2)
         self.assertFalse(len(response_1.data["tags"]))
 
-    def test_create_permissions_anon(self):
+    def test_create_anon(self):
         self.client.logout()
         response = self.client.post(self.list_url, self.q_data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -175,7 +175,7 @@ class QuestionViewSetTests(APITestCase):
         )
         self.assertEqual(response.data, serializer.data)
 
-    def test_retrieve_permissions_anon(self):
+    def test_retrieve_anon(self):
         self.client.logout()
         response = self.client.get(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -204,7 +204,7 @@ class QuestionViewSetTests(APITestCase):
         self.assertEqual(self.question_1.title, data["title"])
         self.assertEqual(self.question_1.tags.count(), 1)
 
-    def test_update_permissions_anon(self):
+    def test_update_anon(self):
         self.client.logout()
         data = {"user": self.user.pk, "title": "What is your age?"}
         response = self.client.post(self.list_url, data)
@@ -268,14 +268,14 @@ class ChoiceViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 3)
 
-    def test_list_permissions_user(self):
+    def test_list_user(self):
         self.client.force_login(self.user)
         # Make a GET request to the endpoint
         response = self.client.get(self.list_url)
         # Test response
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_list_permissions_admin(self):
+    def test_list_anon(self):
         response = self.client.get(self.list_url)
         # Test response
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -425,17 +425,17 @@ class AnswerViewSetTests(APITestCase):
             # Check that the returned data is what we expect
             self.assertEqual(len(response.data), user["answers_len"])
 
-    def test_list_permissions_user(self):
+    def test_list_user(self):
         self.client.force_login(self.user)
         response = self.client.get(self.answer_list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_list_permissions_admin(self):
+    def test_list_admin(self):
         self.client.force_login(self.user_admin)
         response = self.client.get(self.answer_list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_list_permissions_anon(self):
+    def test_list_anon(self):
         response = self.client.get(self.answer_list_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -453,17 +453,17 @@ class AnswerViewSetTests(APITestCase):
         self.assertEqual(response.data["question"], str(self.question.uuid))
         self.assertEqual(response.data["is_correct"], True)
 
-    def test_retrieve_permissions_user(self):
+    def test_retrieve_user(self):
         self.client.force_login(self.user)
         response = self.client.get(self.answer_detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_retrieve_permissions_admin(self):
+    def test_retrieve_admin(self):
         self.client.force_login(self.user_admin)
         response = self.client.get(self.answer_detail_url_admin)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_retrieve_permissions_anon(self):
+    def test_retrieve_anon(self):
         response = self.client.get(self.answer_detail_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
