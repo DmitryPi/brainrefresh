@@ -1,6 +1,4 @@
 from django.shortcuts import get_object_or_404
-from django.urls import reverse
-from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from ..models import Answer, Choice, Question, Tag
@@ -65,7 +63,7 @@ class QuestionListSerializer(QuestionBaseSerializer):
         return question
 
 
-class ChoiceBaseSerializer(serializers.ModelSerializer):
+class _QuestionChoiceSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(
         view_name="api:choice-detail", lookup_field="uuid"
     )
@@ -84,7 +82,7 @@ class ChoiceBaseSerializer(serializers.ModelSerializer):
 
 
 class QuestionDetailSerializer(QuestionBaseSerializer):
-    choices = ChoiceBaseSerializer(many=True, read_only=True)
+    choices = _QuestionChoiceSerializer(many=True, read_only=True)
 
     class Meta:
         model = QuestionBaseSerializer.Meta.model
@@ -105,32 +103,7 @@ class QuestionDetailSerializer(QuestionBaseSerializer):
         return question
 
 
-class ChoiceListSerializer(serializers.ModelSerializer):
-    url = serializers.SerializerMethodField()
-    question = serializers.HyperlinkedRelatedField(
-        view_name="api:question-detail", lookup_field="uuid", read_only=True
-    )
-
-    class Meta:
-        model = Choice
-        fields = [
-            "url",
-            "question",
-            "uuid",
-            "text",
-            "is_correct",
-        ]
-
-    @extend_schema_field(str)
-    def get_url(self, obj):
-        rev = reverse(
-            "api:choice-detail",
-            kwargs={"question_uuid": obj.question.uuid, "uuid": obj.uuid},
-        )
-        return self.context.get("request").build_absolute_uri(rev)
-
-
-class ChoiceDetailSerializer(serializers.ModelSerializer):
+class ChoiceSerializer(serializers.ModelSerializer):
     question = serializers.HyperlinkedRelatedField(
         view_name="api:question-detail", lookup_field="uuid", read_only=True
     )

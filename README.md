@@ -10,8 +10,10 @@
 ---
 
 - Апи
-    - Ограничения прав обновления для choices
-    - Убрать id (questions/<uuid>/choices/)
+    - Тестирование обновленного ChoiceViewSet
+        - Ответ
+        - Права
+        - Кеширование
     - caching for QuestionViewSet list/retrieve with update on save
     - Пагинация вопросов
     - partial_update для QuestionViewSet

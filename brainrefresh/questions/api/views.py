@@ -1,11 +1,9 @@
 from django.conf import settings
-from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django_filters import rest_framework as filters
-from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import OpenApiParameter
 from rest_framework.mixins import (
     CreateModelMixin,
     DestroyModelMixin,
@@ -15,6 +13,7 @@ from rest_framework.mixins import (
 )
 from rest_framework.permissions import (
     AllowAny,
+    IsAdminUser,
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
 )
@@ -24,15 +23,14 @@ from rest_framework.viewsets import GenericViewSet
 from .serializers import (
     Answer,
     AnswerSerializer,
-    ChoiceDetailSerializer,
-    ChoiceListSerializer,
+    Choice,
+    ChoiceSerializer,
     Question,
     QuestionDetailSerializer,
     QuestionListSerializer,
     Tag,
     TagSerializer,
 )
-from .validators import validate_uuid
 
 
 class TagViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
@@ -89,12 +87,6 @@ class QuestionViewSet(
         return query.published()
 
 
-@extend_schema(
-    parameters=[
-        OpenApiParameter("question_uuid", OpenApiTypes.UUID, OpenApiParameter.PATH),
-        OpenApiParameter("uuid", OpenApiTypes.UUID, OpenApiParameter.PATH),
-    ]
-)
 class ChoiceViewSet(
     ListModelMixin,
     CreateModelMixin,
@@ -103,18 +95,15 @@ class ChoiceViewSet(
     GenericViewSet,
 ):
     lookup_field = "uuid"
-    permission_classes = ()
+    serializer_class = ChoiceSerializer
+    queryset = Choice.objects.all()
 
-    def get_queryset(self):
-        question_uuid = self.kwargs.get("question_uuid")
-        validate_uuid(question_uuid)
-        question = get_object_or_404(Question, uuid=question_uuid)
-        return question.choices.all()
-
-    def get_serializer_class(self):
-        if self.action in ["retrieve", "update"]:
-            return ChoiceDetailSerializer
-        return ChoiceListSerializer
+    def get_permissions(self):
+        if self.action == "list":
+            permission_classes = [IsAdminUser]
+        else:
+            permission_classes = [IsAuthenticatedOrReadOnly]
+        return [permission() for permission in permission_classes]
 
 
 class AnswerViewSet(
