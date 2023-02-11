@@ -65,25 +65,36 @@ class QuestionListSerializer(QuestionBaseSerializer):
         return question
 
 
+class ChoiceBaseSerializer(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(
+        view_name="api:choice-detail", lookup_field="uuid"
+    )
+
+    class Meta:
+        model = Choice
+        fields = [
+            "url",
+            "uuid",
+            "text",
+            "is_correct",
+        ]
+        extra_kwargs = {
+            "is_correct": {"write_only": True},
+        }
+
+
 class QuestionDetailSerializer(QuestionBaseSerializer):
-    choices_url = serializers.SerializerMethodField()
+    choices = ChoiceBaseSerializer(many=True, read_only=True)
 
     class Meta:
         model = QuestionBaseSerializer.Meta.model
-        fields = [
-            "choices_url",
-        ] + QuestionBaseSerializer.Meta.fields
-
-    @extend_schema_field(str)
-    def get_choices_url(self, obj):
-        return self.context["request"].build_absolute_uri(
-            reverse("api:choice-list", kwargs={"question_uuid": obj.uuid})
-        )
+        fields = QuestionBaseSerializer.Meta.fields + [
+            "choices",
+        ]
 
     def update(self, instance, validated_data):
         # pop tags
         tags_data = validated_data.pop("tags", [])
-        print(tags_data)
         tag_slugs = [tag["slug"] for tag in tags_data if "slug" in tag]
         # update question
         question = super().update(instance, validated_data)
@@ -96,10 +107,19 @@ class QuestionDetailSerializer(QuestionBaseSerializer):
 
 class ChoiceListSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
+    question = serializers.HyperlinkedRelatedField(
+        view_name="api:question-detail", lookup_field="uuid", read_only=True
+    )
 
     class Meta:
         model = Choice
-        fields = ["uuid", "question", "text", "is_correct", "url"]
+        fields = [
+            "url",
+            "question",
+            "uuid",
+            "text",
+            "is_correct",
+        ]
 
     @extend_schema_field(str)
     def get_url(self, obj):
@@ -110,7 +130,7 @@ class ChoiceListSerializer(serializers.ModelSerializer):
         return self.context.get("request").build_absolute_uri(rev)
 
 
-class ChoiceDetailSerializer(serializers.HyperlinkedModelSerializer):
+class ChoiceDetailSerializer(serializers.ModelSerializer):
     question = serializers.HyperlinkedRelatedField(
         view_name="api:question-detail", lookup_field="uuid", read_only=True
     )

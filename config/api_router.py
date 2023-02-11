@@ -18,9 +18,7 @@ router.register("users", UserViewSet)
 router.register("tags", TagViewSet, basename="tag")
 router.register("questions", QuestionViewSet, basename="question")
 router.register("answers", AnswerViewSet, basename="answer")
-router.register(
-    "questions/(?P<question_uuid>[^/.]+)/choices", ChoiceViewSet, basename="choice"
-)
+router.register("choices", ChoiceViewSet, basename="choice")
 
 app_name = "api"
 urlpatterns = router.urls

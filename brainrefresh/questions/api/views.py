@@ -83,7 +83,10 @@ class QuestionViewSet(
         return QuestionListSerializer
 
     def get_queryset(self):
-        return Question.objects.prefetch_related("tags").published()
+        query = Question.objects.prefetch_related("tags")
+        if self.action in ["retrieve", "update"]:
+            query = query.prefetch_related("choices")
+        return query.published()
 
 
 @extend_schema(
