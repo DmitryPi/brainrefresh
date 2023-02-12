@@ -475,6 +475,22 @@ class AnswerViewSetTests(APITestCase):
         # Test response
         self.assertEqual(response_keys, keys)
 
+    def test_create(self):
+        self.client.force_login(self.user)
+        # Send a POST request to the create endpoint
+        response = self.client.post(self.list_url, self.user_answer_data, format="json")
+        # Check that the response has a status code of 201 (Created)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_anon(self):
+        response = self.client.post(self.list_url, self.user_answer_data, format="json")
+        # Check that the response has a status code of 201 (Created)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_create_incorrect_choice_data_and_that_is_not_gonna_be_created(self):
+        """TODO"""
+        pass
+
     def test_retrieve(self):
         self.client.force_login(self.user)
         # Get API response
@@ -494,19 +510,3 @@ class AnswerViewSetTests(APITestCase):
     def test_retrieve_anon(self):
         response = self.client.get(self.detail_url_user)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_create(self):
-        self.client.force_login(self.user)
-        # Send a POST request to the create endpoint
-        response = self.client.post(self.list_url, self.user_answer_data, format="json")
-        # Check that the response has a status code of 201 (Created)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-    def test_create_anon(self):
-        response = self.client.post(self.list_url, self.user_answer_data, format="json")
-        # Check that the response has a status code of 201 (Created)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_create_incorrect_choice_data_and_that_is_not_gonna_be_created(self):
-        """TODO"""
-        pass
