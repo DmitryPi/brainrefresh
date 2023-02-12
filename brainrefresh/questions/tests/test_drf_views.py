@@ -20,9 +20,6 @@ User = get_user_model()
 
 class TagViewSetTests(APITestCase):
     def setUp(self):
-        """
-        TODO: test permissions
-        """
         self.user = UserFactory()
         self.tag_1 = TagFactory(label="Test Tag 1")
         self.tag_2 = TagFactory(label="Test Tag 2")
@@ -433,6 +430,8 @@ class AnswerViewSetTests(APITestCase):
         # Create Answers
         self.answers_user = AnswerFactory.create_batch(2, user=self.user)
         self.answers_user_1 = AnswerFactory.create_batch(3, user=self.user_1)
+        # Create Choices
+        self.choice_by_user = ChoiceFactory(question=self.answers_user[0].question)
         # Urls
         self.list_url = reverse("api:answer-list")
         self.detail_url_user = reverse(
@@ -441,6 +440,12 @@ class AnswerViewSetTests(APITestCase):
         self.detail_url_user_1 = reverse(
             "api:answer-detail", kwargs={"uuid": self.answers_user_1[0].uuid}
         )
+        # Data
+        self.user_answer_data = {
+            "question": self.answers_user[0].question.uuid,
+            "choices": [{"uuid": self.choice_by_user.uuid}],
+            "is_correct": True,
+        }
 
     def test_list(self):
         # Test correct list of answers for request.user
@@ -490,44 +495,18 @@ class AnswerViewSetTests(APITestCase):
         response = self.client.get(self.detail_url_user)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    # def test_create(self):
-    #     self.client.login(**self.user_log_pass)
-    #     data = {
-    #         "question": self.question.uuid,
-    #         "choices": [
-    #             {
-    #                 "uuid": self.choices[0].uuid,
-    #                 "question": self.question.uuid,
-    #                 "text": self.choices[0].text,
-    #                 "is_correct": self.choices[0].is_correct,
-    #             }
-    #         ],
-    #     }
-    #     response = self.client.post("/api/answers/", data, format="json")
-    #     self.assertEqual(response.content, "ABC")
-    #     self.assertEqual(response.status_code, 201)
+    def test_create(self):
+        self.client.force_login(self.user)
+        # Send a POST request to the create endpoint
+        response = self.client.post(self.list_url, self.user_answer_data, format="json")
+        # Check that the response has a status code of 201 (Created)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    # def test_create(self):
-    #     # Login user
-    #     self.client.force_login(self.user)
-    #     # Answer data
-    #     question_url = self.factory.get(self.question_detail_url).build_absolute_uri()
-    #     data = {
-    #         "question": question_url,
-    #         "choices": [
-    #             {
-    #                 "uuid": self.choices[0].uuid,
-    #                 "question": question_url,
-    #                 "text": "Раз",
-    #                 "is_correct": True,
-    #             },
-    #         ],
-    #         "is_correct": True,
-    #     }
-    #     response = self.client.post(self.answer_list_url, data)
-    #     self.assertEqual(response.content, "ABC")
+    def test_create_anon(self):
+        response = self.client.post(self.list_url, self.user_answer_data, format="json")
+        # Check that the response has a status code of 201 (Created)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    # def test_create_anon(self):
-    #     data = {"question": self.question.uuid}
-    #     response = self.client.post(self.answer_list_url, data)
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    def test_create_incorrect_choice_data_and_that_is_not_gonna_be_created(self):
+        """TODO"""
+        pass

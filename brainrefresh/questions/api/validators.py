@@ -21,7 +21,7 @@ def validate_uuid(target: UUID, error_msg: str = "") -> None:
 def compare_users_and_restrict(
     request_user: User, instance_user: User, call_from: str = "serializer"
 ) -> None:
-    """Pass 2 users to compare and raise error if they're not equal. Staff users are omitted.
+    """Compare 2 users and raise error if they're not equal. Staff users are omitted.
 
     Raises:
         serializers.ValidationError: if call_from was "serializer"
@@ -34,3 +34,13 @@ def compare_users_and_restrict(
                 raise serializers.ValidationError(msg)
             case "view":
                 raise PermissionDenied(msg)
+
+
+def validate_two_uuids(uuid_1: UUID, uuid_2: UUID) -> None:
+    """Compare 2 uuids and raise error if they're not equal.
+
+    Raises:
+        serializers.ValidationError
+    """
+    if uuid_1 != uuid_2:
+        raise serializers.ValidationError()

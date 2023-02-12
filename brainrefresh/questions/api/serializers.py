@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from drf_spectacular.types import OpenApiTypes
@@ -5,7 +6,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from ..models import Answer, Choice, Question, Tag
-from .validators import compare_users_and_restrict
+from .validators import compare_users_and_restrict, validate_two_uuids
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -107,7 +108,7 @@ class QuestionDetailSerializer(QuestionBaseSerializer):
 
     def update(self, instance, validated_data):
         request = self.context.get("request")
-        # permission check
+        # validate users
         compare_users_and_restrict(request.user, instance.user)
         # pop tags
         tags_data = validated_data.pop("tags", [])
@@ -142,7 +143,7 @@ class ChoiceSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context.get("request")
         question = validated_data.get("question")
-        # permission check
+        # validate users
         compare_users_and_restrict(request.user, question.user)
         # create call
         choice = Choice.objects.create(**validated_data)
@@ -151,27 +152,28 @@ class ChoiceSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         request = self.context.get("request")
         question = validated_data.get("question")
-        # permission check
+        # validate users
         compare_users_and_restrict(request.user, question.user)
         # update call
         choice = super().update(instance, validated_data)
         return choice
 
 
-class _AnswerChoiceSerializer(serializers.ModelSerializer):
-    """Used for serializing Answer model choices field"""
+class _AnswerChoicesSerializer(serializers.Serializer):
+    """TODO: Переосмыслить дизайн этого сериалайзера"""
 
-    question = serializers.UUIDField(source="question.uuid")
+    uuid = serializers.UUIDField()
+    question = serializers.UUIDField(source="question.uuid", read_only=True)
+    text = serializers.CharField(read_only=True)
+    is_correct = serializers.BooleanField(read_only=True)
 
-    class Meta:
-        model = Choice
-        fields = ["uuid", "question", "text", "is_correct"]
 
-
-class AnswerSerializer(serializers.HyperlinkedModelSerializer):
+class AnswerSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    question = serializers.UUIDField(source="question.uuid")
-    choices = _AnswerChoiceSerializer(many=True)
+    question = serializers.SlugRelatedField(
+        slug_field="uuid", queryset=Question.objects.all()
+    )
+    choices = _AnswerChoicesSerializer(many=True)
 
     class Meta:
         model = Answer
@@ -186,18 +188,17 @@ class AnswerSerializer(serializers.HyperlinkedModelSerializer):
         ]
         extra_kwargs = {
             "url": {"view_name": "api:answer-detail", "lookup_field": "uuid"},
-            "question": {"view_name": "api:question-detail", "lookup_field": "uuid"},
         }
 
+    @transaction.atomic()
     def create(self, validated_data):
-        """
-        TODO: nested creation
-        """
-        question_data = validated_data.pop("question")
+        question = validated_data.pop("question")
         choices_data = validated_data.pop("choices")
-        question = get_object_or_404(Answer, uuid=question_data["uuid"])
+        # create answer
         answer = Answer.objects.create(question=question, **validated_data)
+        # loop over nested choices and validate question uuids
         for choice_data in choices_data:
             choice = get_object_or_404(Choice, uuid=choice_data["uuid"])
-            answer.add(choice)
+            validate_two_uuids(question.uuid, choice.question.uuid)
+            answer.choices.add(choice)
         return answer

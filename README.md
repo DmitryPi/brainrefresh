@@ -10,17 +10,12 @@
 ---
 
 - Апи
-    - Answer api
     - caching for QuestionViewSet list/retrieve with update on save
-    - Пагинация вопросов
-    - user to QuestionViewSet
-    - partial_update для QuestionViewSet
-    - Фильтрация questions по пользователю
-    - Фильтрация questions по тегу
-    - Тест фильтрации, пагинации, порядка
+    - Фильтрация questions по тегу, пользователю + тесты
+    - Шифрование api
     - Implement question daily limit for user creation
+    - partial_update для QuestionViewSet
     - Добавление модели Quiz с ManyToMany к Question
-    - Hide api
 
 ## Идеи
 

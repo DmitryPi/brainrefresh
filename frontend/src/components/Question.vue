@@ -79,7 +79,6 @@ export default {
         },
 
         checkCheckbox() {
-            // TODO: compile result, show what was right/wrong
             let allCorrect = true;
             this.selectedOptions.forEach((selectedOption) => {
                 const answer = this.choices.find(

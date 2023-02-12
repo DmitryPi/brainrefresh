@@ -25,7 +25,7 @@ export default defineConfig({
     target: 'es2015',
     rollupOptions: {
       input: {
-        // app: resolve(__dirname, 'index.html'),  // TODO: specify public path dir
+        // app: resolve(__dirname, 'index.html'),
         main: resolve(__dirname, 'src/main.js'),
       },
       output: {
