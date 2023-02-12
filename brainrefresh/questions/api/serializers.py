@@ -41,10 +41,16 @@ class _QuestionChoiceSerializer(serializers.ModelSerializer):
         }
 
 
+class QuestionCreatorSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    name = serializers.CharField()
+
+
 class QuestionBaseSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(
         view_name="api:question-detail", lookup_field="uuid"
     )
+    creator = QuestionCreatorSerializer(read_only=True)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     tags = _QuestionTagSerializer(Tag.objects.all(), many=True, required=False)
 
@@ -62,6 +68,11 @@ class QuestionBaseSerializer(serializers.ModelSerializer):
             "created_at",
             "tags",
         ]
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation["creator"] = QuestionCreatorSerializer(instance.user).data
+        return representation
 
 
 class QuestionListSerializer(QuestionBaseSerializer):
