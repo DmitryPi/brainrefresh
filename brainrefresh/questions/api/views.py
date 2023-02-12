@@ -64,10 +64,20 @@ class QuestionViewSet(
     DestroyModelMixin,
     GenericViewSet,
 ):
+    class QuestionFilter(filters.FilterSet):
+        user = filters.CharFilter(field_name="user__username", lookup_expr="exact")
+        tag = filters.CharFilter(
+            field_name="tags__slug", lookup_expr="icontains"
+        )  # could change to ModelMultipleChoiceFilter if needed
+
+        class Meta:
+            model = Question
+            fields = ["tag", "user", "language"]
+
     lookup_field = "uuid"
     permission_classes = (IsAuthenticatedOrReadOnly,)
     filter_backends = (filters.DjangoFilterBackend,)
-    filterset_fields = ("language",)
+    filterset_class = QuestionFilter
     pagination_class = LimitOffsetPagination
     parameters = [
         OpenApiParameter(
@@ -84,7 +94,7 @@ class QuestionViewSet(
         return QuestionListSerializer
 
     def get_queryset(self):
-        query = Question.objects.prefetch_related("tags")
+        query = Question.objects.select_related("user").prefetch_related("tags")
         if self.action in ["retrieve", "update"]:
             query = query.prefetch_related("choices")
         return query.published()

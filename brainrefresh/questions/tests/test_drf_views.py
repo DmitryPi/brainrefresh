@@ -158,6 +158,53 @@ class QuestionViewSetTests(APITestCase):
         self.assertEqual(response_keys, keys)
         self.assertTrue(response.data["count"], 2)
 
+    def test_list_filter_by_tag(self):
+        # Create some data
+        tag_1 = TagFactory(label="Python")
+        tag_2 = TagFactory(label="Some Complexity")
+        QuestionFactory.create_batch(3, tags=[tag_1, tag_2], published=True)
+        QuestionFactory.create_batch(5, tags=[tag_2], published=True)
+        QuestionFactory(tags=[tag_2], published=False)  # won't be counted
+        # urls
+        url_1 = f"{self.list_url}?tag={tag_1.slug}"
+        url_2 = f"{self.list_url}?tag={tag_2.slug}"
+        # GET response
+        response_1 = self.client.get(url_1)
+        response_2 = self.client.get(url_2)
+        # Test response
+        self.assertEqual(response_1.data["count"], 3)
+        self.assertEqual(response_2.data["count"], 8)
+
+    def test_list_filter_by_language(self):
+        """Hard to test without isolating this test"""
+        QuestionFactory.create_batch(3, language=Question.Lang.EN, published=True)
+        QuestionFactory.create_batch(5, language=Question.Lang.RU, published=True)
+        # urls
+        url_1 = f"{self.list_url}?language={Question.Lang.EN}"
+        url_2 = f"{self.list_url}?language={Question.Lang.RU}"
+        # GET response
+        response_1 = self.client.get(url_1)
+        response_2 = self.client.get(url_2)
+        # Test response
+        self.assertTrue(response_1.data["count"] >= 3)
+        self.assertTrue(response_2.data["count"] >= 5)
+
+    def test_list_filter_by_user_username(self):
+        # Create some data
+        user_1 = UserFactory(username="seombody")
+        user_2 = SuperUserFactory(username="killer1337")
+        QuestionFactory.create_batch(3, user=user_1, published=True)
+        QuestionFactory.create_batch(5, user=user_2, published=True)
+        # urls
+        url_1 = f"{self.list_url}?user={user_1.username}"
+        url_2 = f"{self.list_url}?user={user_2.username}"
+        # GET response
+        response_1 = self.client.get(url_1)
+        response_2 = self.client.get(url_2)
+        # Test response
+        self.assertEqual(response_1.data["count"], 3)
+        self.assertEqual(response_2.data["count"], 5)
+
     def test_create(self):
         self.client.force_login(self.user)
         # Send a POST request to the create endpoint

@@ -10,8 +10,7 @@
 ---
 
 - Апи
-    - caching for QuestionViewSet list/retrieve with update on save
-    - Фильтрация questions по тегу, пользователю + тесты
+    - Кеширование с инвалидацией ключей  для QuestionViewSet list/retrieve
     - Шифрование api
     - Implement question daily limit for user creation
     - partial_update для QuestionViewSet
