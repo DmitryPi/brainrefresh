@@ -7,6 +7,7 @@ from brainrefresh.users.tests.factories import SuperUserFactory, UserFactory
 
 from ..api.serializers import QuestionDetailSerializer, QuestionListSerializer
 from .factories import (
+    Answer,
     AnswerFactory,
     Choice,
     ChoiceFactory,
@@ -509,4 +510,23 @@ class AnswerViewSetTests(APITestCase):
 
     def test_retrieve_anon(self):
         response = self.client.get(self.detail_url_user)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_destroy(self):
+        self.client.force_login(self.user)
+        # Send a DELETE request to the destroy endpoint for the first question
+        response = self.client.delete(self.detail_url_user)
+        # Test response and data change
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Answer.objects.filter(uuid=self.answers_user[0].uuid).exists())
+
+    def test_user_cant_destroy_for_other_users(self):
+        self.client.force_login(self.user_1)
+        # Send a DELETE request to the destroy endpoint for the first question
+        response = self.client.delete(self.detail_url_user)
+        # Test response and data change
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_destroy_anon(self):
+        response = self.client.delete(self.detail_url_user)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
