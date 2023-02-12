@@ -20,6 +20,7 @@ from rest_framework.permissions import (
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from .pagination import LimitOffsetPagination
 from .serializers import (
     Answer,
     AnswerSerializer,
@@ -67,6 +68,7 @@ class QuestionViewSet(
     permission_classes = (IsAuthenticatedOrReadOnly,)
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_fields = ("language",)
+    pagination_class = LimitOffsetPagination
     parameters = [
         OpenApiParameter(
             name="language",
