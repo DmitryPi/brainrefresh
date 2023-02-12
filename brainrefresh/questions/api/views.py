@@ -127,11 +127,13 @@ class AnswerViewSet(
     ListModelMixin,
     CreateModelMixin,
     RetrieveModelMixin,
+    DestroyModelMixin,
     GenericViewSet,
 ):
     serializer_class = AnswerSerializer
     lookup_field = "uuid"
     permission_classes = (IsAuthenticated,)
+    pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
         queryset = (

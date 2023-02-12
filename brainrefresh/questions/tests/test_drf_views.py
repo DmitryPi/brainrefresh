@@ -75,7 +75,7 @@ class TagViewSetTests(APITestCase):
 
 class QuestionViewSetTests(APITestCase):
     def setUp(self):
-        # Create a user to use for authentication
+        # Create a users to use for authentication
         self.user = UserFactory()
         self.user_1 = UserFactory()
         self.user_admin = SuperUserFactory()
@@ -426,113 +426,72 @@ class ChoiceViewSetTests(APITestCase):
 
 class AnswerViewSetTests(APITestCase):
     def setUp(self):
-        """Придумай путь как разделить данные для тестирования, чтобы не было запутанно"""
-        # Create a user to use for authentication
+        # Create a users to use for authentication
         self.user = UserFactory()
+        self.user_1 = UserFactory()
         self.user_admin = SuperUserFactory()
-        # Create Question
-        self.question = QuestionFactory(
-            title="What is Django?", text="Django is Python web framework"
-        )
-        self.question_1 = QuestionFactory(title="American moon landing was hoax?")
-        # Create Choices
-        self.choices = [
-            ChoiceFactory(
-                question=self.question, text="Python Framework", is_correct=True
-            ),
-            ChoiceFactory(
-                question=self.question, text="Programming Language", is_correct=False
-            ),
-            ChoiceFactory(question=self.question_1, text="Yes", is_correct=True),
-            ChoiceFactory(question=self.question_1, text="No", is_correct=False),
-        ]
         # Create Answers
-        self.answers = [
-            AnswerFactory(question=self.question, user=self.user, is_correct=False),
-            AnswerFactory(question=self.question_1, user=self.user, is_correct=True),
-            AnswerFactory(
-                question=self.question, user=self.user_admin, is_correct=True
-            ),
+        self.answers_user = AnswerFactory.create_batch(2, user=self.user)
+        self.answers_user_1 = AnswerFactory.create_batch(3, user=self.user_1)
+        # Urls
+        self.list_url = reverse("api:answer-list")
+        self.detail_url_user = reverse(
+            "api:answer-detail", kwargs={"uuid": self.answers_user[0].uuid}
+        )
+        self.detail_url_user_1 = reverse(
+            "api:answer-detail", kwargs={"uuid": self.answers_user_1[0].uuid}
+        )
+
+    def test_list(self):
+        # Test correct list of answers for request.user
+        users = [
+            {"instance": self.user, "answers_len": 2},
+            {"instance": self.user_1, "answers_len": 3},
+            {"instance": self.user_admin, "answers_len": 0},
         ]
-        self.answers_user = []
-        self.answers_admin = []
-        self.answers[0].set(self.choices[:2])
-        self.answers[1].add(self.choices[2])
-        # Create request factory
-        self.factory = APIRequestFactory()
-        self.answer_list_url = reverse("api:answer-list")
-        self.answer_detail_url = reverse(
-            "api:answer-detail", kwargs={"uuid": self.answers[0].uuid}
-        )
-        self.answer_detail_url_admin = reverse(
-            "api:answer-detail", kwargs={"uuid": self.answers[2].uuid}
-        )
-        self.question_detail_url = reverse(
-            "api:question-detail", kwargs={"uuid": self.question.uuid}
-        )
+        for user in users:
+            self.client.force_login(user["instance"])
+            # Send a GET request to the list endpoint
+            response = self.client.get(self.list_url)
+            # Test response
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(len(response.data["results"]), user["answers_len"])
 
-    # def test_list(self):
-    #     # Test correct list of answers for request.user
-    #     users = [
-    #         {"instance": self.user, "answers_len": 2},
-    #         {"instance": self.user_admin, "answers_len": 1},
-    #     ]
-    #     for user in users:
-    #         # Login user
-    #         self.client.force_login(user["instance"])
-    #         # Send a GET request to the list endpoint
-    #         response = self.client.get(reverse("api:answer-list"))
+    def test_list_anon(self):
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    #         # Check that the response has a status code of 200 (OK)
-    #         self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #         # Check that the returned data is what we expect
-    #         self.assertEqual(len(response.data), user["answers_len"])
+    def test_list_pagination(self):
+        self.client.force_login(self.user)
+        # Get API response
+        response = self.client.get(self.list_url)
+        response_keys = list(response.data.keys())
+        keys = ["limit", "offset", "count", "next", "previous", "results"]
+        # Test response
+        self.assertEqual(response_keys, keys)
 
-    # def test_list_user(self):
-    #     self.client.force_login(self.user)
-    #     response = self.client.get(self.answer_list_url)
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    def test_retrieve(self):
+        self.client.force_login(self.user)
+        # Get API response
+        response = self.client.get(self.detail_url_user)
+        response_keys = list(response.data.keys())
+        keys = ["url", "uuid", "question", "choices", "is_correct", "created_at"]
+        # Test response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_keys, keys)
 
-    # def test_list_admin(self):
-    #     self.client.force_login(self.user_admin)
-    #     response = self.client.get(self.answer_list_url)
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    def test_retrieve_from_foreign_user(self):
+        self.client.force_login(self.user_1)
+        # Get API response from self.user
+        response = self.client.get(self.detail_url_user)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    # def test_list_anon(self):
-    #     response = self.client.get(self.answer_list_url)
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    def test_retrieve_anon(self):
+        response = self.client.get(self.detail_url_user)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    # def test_retrieve(self):
-    #     # Login user
-    #     self.client.force_login(self.user)
-    #     # Build question hyperlink
-    #     # question_url = self.factory.get(self.question_detail_url).build_absolute_uri()
-    #     # Get API response
-    #     response = self.client.get(self.answer_detail_url)
-    #     # Test response
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     # Test serialized data
-    #     self.assertEqual(response.data["uuid"], str(self.answers[0].uuid))
-    #     self.assertEqual(response.data["question"], str(self.question.uuid))
-    #     self.assertEqual(response.data["is_correct"], True)
-
-    # def test_retrieve_user(self):
-    #     self.client.force_login(self.user)
-    #     response = self.client.get(self.answer_detail_url)
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    # def test_retrieve_admin(self):
-    #     self.client.force_login(self.user_admin)
-    #     response = self.client.get(self.answer_detail_url_admin)
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    # def test_retrieve_anon(self):
-    #     response = self.client.get(self.answer_detail_url)
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    # def test_create_answer(self):
+    # def test_create(self):
     #     self.client.login(**self.user_log_pass)
-    #     question_url = self.factory.get(self.question_detail_url).build_absolute_uri()
     #     data = {
     #         "question": self.question.uuid,
     #         "choices": [
@@ -547,13 +506,6 @@ class AnswerViewSetTests(APITestCase):
     #     response = self.client.post("/api/answers/", data, format="json")
     #     self.assertEqual(response.content, "ABC")
     #     self.assertEqual(response.status_code, 201)
-
-    # self.assertEqual(Answer.objects.count(), 1)
-    # answer = Answer.objects.first()
-    # self.assertEqual(answer.user, self.user)
-    # self.assertEqual(answer.question, self.question)
-    # self.assertEqual(answer.choices.count(), 1)
-    # self.assertEqual(answer.choices.first(), self.choice)
 
     # def test_create(self):
     #     # Login user
