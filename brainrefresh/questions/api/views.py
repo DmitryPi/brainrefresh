@@ -17,7 +17,6 @@ from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
 )
-from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from .pagination import LimitOffsetPagination
@@ -39,21 +38,23 @@ class TagViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     queryset = Tag.objects.prefetch_related("questions")
     serializer_class = TagSerializer
     lookup_field = "slug"
-    permission_classes = (AllowAny,)
+
+    def get_permissions(self):
+        if self.action in ["list", "retrieve"]:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAdminUser]
+        return [permission() for permission in permission_classes]
 
     @method_decorator(cache_page(settings.API_CACHE_TIME))
     @method_decorator(vary_on_cookie)
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        return super().list(request, *args, **kwargs)
 
     @method_decorator(cache_page(settings.API_CACHE_TIME))
     @method_decorator(vary_on_cookie)
     def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+        return super().retrieve(request, *args, **kwargs)
 
 
 class QuestionViewSet(

@@ -16,14 +16,6 @@ class TagSerializer(serializers.ModelSerializer):
         extra_kwargs = {"url": {"view_name": "api:tag-detail", "lookup_field": "slug"}}
 
 
-class _QuestionTagSerializer(serializers.Serializer):
-    url = serializers.HyperlinkedIdentityField(
-        view_name="api:tag-detail", lookup_field="slug"
-    )
-    label = serializers.CharField(read_only=True)
-    slug = serializers.SlugField()
-
-
 class _QuestionChoiceSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(
         view_name="api:choice-detail", lookup_field="uuid"
@@ -42,18 +34,24 @@ class _QuestionChoiceSerializer(serializers.ModelSerializer):
         }
 
 
-class QuestionCreatorSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    name = serializers.CharField()
-
-
 class QuestionBaseSerializer(serializers.ModelSerializer):
+    class TagsSerializer(serializers.Serializer):
+        url = serializers.HyperlinkedIdentityField(
+            view_name="api:tag-detail", lookup_field="slug"
+        )
+        label = serializers.CharField(read_only=True)
+        slug = serializers.SlugField()
+
+    class CreatorSerializer(serializers.Serializer):
+        username = serializers.CharField()
+        name = serializers.CharField()
+
     url = serializers.HyperlinkedIdentityField(
         view_name="api:question-detail", lookup_field="uuid"
     )
-    creator = QuestionCreatorSerializer(read_only=True)
+    creator = CreatorSerializer(read_only=True)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    tags = _QuestionTagSerializer(Tag.objects.all(), many=True, required=False)
+    tags = TagsSerializer(Tag.objects.all(), many=True, required=False)
 
     class Meta:
         model = Question
@@ -72,7 +70,7 @@ class QuestionBaseSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation["creator"] = QuestionCreatorSerializer(instance.user).data
+        representation["creator"] = self.CreatorSerializer(instance.user).data
         return representation
 
 
@@ -159,21 +157,17 @@ class ChoiceSerializer(serializers.ModelSerializer):
         return choice
 
 
-class _AnswerChoicesSerializer(serializers.Serializer):
-    """TODO: Переосмыслить дизайн этого сериалайзера"""
-
-    uuid = serializers.UUIDField()
-    question = serializers.UUIDField(source="question.uuid", read_only=True)
-    text = serializers.CharField(read_only=True)
-    is_correct = serializers.BooleanField(read_only=True)
-
-
 class AnswerSerializer(serializers.ModelSerializer):
+    class ChoicesSerializer(serializers.Serializer):
+        uuid = serializers.UUIDField()
+        text = serializers.CharField(read_only=True)
+        is_correct = serializers.BooleanField(read_only=True)
+
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     question = serializers.SlugRelatedField(
         slug_field="uuid", queryset=Question.objects.all()
     )
-    choices = _AnswerChoicesSerializer(many=True)
+    choices = ChoicesSerializer(many=True)
 
     class Meta:
         model = Answer
