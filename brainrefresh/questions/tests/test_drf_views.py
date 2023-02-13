@@ -382,6 +382,11 @@ class ChoiceViewSetTests(APITestCase):
         # Test response
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_list_caching(self):
+        self.client.force_login(self.user_admin)
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.headers["Cache-Control"], "max-age=3600")
+
     def test_list_pagination(self):
         self.client.force_login(self.user_admin)
         # Get API response
@@ -439,6 +444,10 @@ class ChoiceViewSetTests(APITestCase):
         response = self.client.get(self.detail_url)
         # Test response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_retrieve_caching(self):
+        response = self.client.get(self.detail_url)
+        self.assertEqual(response.headers["Cache-Control"], "max-age=3600")
 
     def test_update(self):
         self.client.force_login(self.user)
@@ -542,6 +551,11 @@ class AnswerViewSetTests(APITestCase):
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_list_not_cached(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.list_url)
+        self.assertFalse(response.headers.get("Cache-Control"))
+
     def test_list_pagination(self):
         self.client.force_login(self.user)
         # Get API response
@@ -576,6 +590,11 @@ class AnswerViewSetTests(APITestCase):
         # Test response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_keys, keys)
+
+    def test_retrieve_not_cached(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.detail_url_user)
+        self.assertFalse(response.headers.get("Cache-Control"))
 
     def test_retrieve_from_foreign_user(self):
         self.client.force_login(self.user_1)
