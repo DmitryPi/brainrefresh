@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from django.views.decorators.vary import vary_on_cookie
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import OpenApiParameter
 from rest_framework.mixins import (
@@ -47,12 +46,10 @@ class TagViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
         return [permission() for permission in permission_classes]
 
     @method_decorator(cache_page(settings.API_CACHE_TIME))
-    @method_decorator(vary_on_cookie)
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
     @method_decorator(cache_page(settings.API_CACHE_TIME))
-    @method_decorator(vary_on_cookie)
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 

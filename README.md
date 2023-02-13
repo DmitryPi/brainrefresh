@@ -10,7 +10,6 @@
 ---
 
 - Апи
-    - Кеширование с инвалидацией ключей  для QuestionViewSet list/retrieve
     - Шифрование api
     - Implement question daily limit for user creation
     - partial_update для QuestionViewSet

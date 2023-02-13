@@ -22,7 +22,10 @@ CACHES = {
         "LOCATION": "",
     }
 }
-
+# MIDDLEWARE += [
+#     "django.middleware.cache.UpdateCacheMiddleware",
+#     "django.middleware.cache.FetchFromCacheMiddleware",
+# ]
 # EMAIL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-host
