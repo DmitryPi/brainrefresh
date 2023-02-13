@@ -97,6 +97,14 @@ class QuestionViewSet(
             query = query.prefetch_related("choices")
         return query.published()
 
+    @method_decorator(cache_page(settings.API_CACHE_TIME))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @method_decorator(cache_page(settings.API_CACHE_TIME))
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
     def perform_destroy(self, instance):
         compare_users_and_restrict(self.request.user, instance.user, call_from="view")
         instance.delete()

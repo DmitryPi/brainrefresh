@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db.models import signals
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APIRequestFactory, APITestCase
@@ -21,6 +22,10 @@ User = get_user_model()
 
 class TagViewSetTests(APITestCase):
     def setUp(self):
+        # disable signals
+        signals.post_save.receivers = []
+        signals.post_delete.receivers = []
+        # create test data
         self.user = UserFactory()
         self.tag_1 = TagFactory(label="Test Tag 1")
         self.tag_2 = TagFactory(label="Test Tag 2")
@@ -73,6 +78,9 @@ class TagViewSetTests(APITestCase):
 
 class QuestionViewSetTests(APITestCase):
     def setUp(self):
+        # disable signals
+        signals.post_save.receivers = []
+        signals.post_delete.receivers = []
         # Create a users to use for authentication
         self.user = UserFactory()
         self.user_1 = UserFactory()
@@ -149,6 +157,10 @@ class QuestionViewSetTests(APITestCase):
     def test_list_anon(self):
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_list_caching(self):
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.headers["Cache-Control"], "max-age=3600")
 
     def test_list_pagination(self):
         keys = ["limit", "offset", "count", "next", "previous", "results"]
@@ -245,6 +257,10 @@ class QuestionViewSetTests(APITestCase):
         response = self.client.get(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_retrieve_caching(self):
+        response = self.client.get(self.detail_url)
+        self.assertEqual(response.headers["Cache-Control"], "max-age=3600")
+
     def test_update(self):
         self.client.force_login(self.user)
         # Send a PUT request to the update endpoint for the first question
@@ -308,6 +324,9 @@ class QuestionViewSetTests(APITestCase):
 
 class ChoiceViewSetTests(APITestCase):
     def setUp(self):
+        # disable signals
+        signals.post_save.receivers = []
+        signals.post_delete.receivers = []
         # Create User objects
         self.user = UserFactory()
         self.user_1 = UserFactory()
