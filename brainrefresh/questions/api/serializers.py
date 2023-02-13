@@ -16,24 +16,6 @@ class TagSerializer(serializers.ModelSerializer):
         extra_kwargs = {"url": {"view_name": "api:tag-detail", "lookup_field": "slug"}}
 
 
-class _QuestionChoiceSerializer(serializers.ModelSerializer):
-    url = serializers.HyperlinkedIdentityField(
-        view_name="api:choice-detail", lookup_field="uuid"
-    )
-
-    class Meta:
-        model = Choice
-        fields = [
-            "url",
-            "uuid",
-            "text",
-            "is_correct",
-        ]
-        extra_kwargs = {
-            "is_correct": {"write_only": True},
-        }
-
-
 class QuestionBaseSerializer(serializers.ModelSerializer):
     class TagsSerializer(serializers.Serializer):
         url = serializers.HyperlinkedIdentityField(
@@ -45,13 +27,6 @@ class QuestionBaseSerializer(serializers.ModelSerializer):
     class CreatorSerializer(serializers.Serializer):
         username = serializers.CharField()
         name = serializers.CharField()
-
-    url = serializers.HyperlinkedIdentityField(
-        view_name="api:question-detail", lookup_field="uuid"
-    )
-    creator = CreatorSerializer(read_only=True)
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    tags = TagsSerializer(Tag.objects.all(), many=True, required=False)
 
     class Meta:
         model = Question
@@ -67,6 +42,13 @@ class QuestionBaseSerializer(serializers.ModelSerializer):
             "created_at",
             "tags",
         ]
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name="api:question-detail", lookup_field="uuid"
+    )
+    creator = CreatorSerializer(read_only=True)
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    tags = TagsSerializer(Tag.objects.all(), many=True, required=False)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -95,14 +77,32 @@ class QuestionListSerializer(QuestionBaseSerializer):
         return question
 
 
-class QuestionDetailSerializer(QuestionBaseSerializer):
-    choices = _QuestionChoiceSerializer(many=True, read_only=True)
+class QuestionDetailChoicesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Choice
+        fields = [
+            "url",
+            "uuid",
+            "text",
+            "is_correct",
+        ]
+        extra_kwargs = {
+            "is_correct": {"write_only": True},
+        }
 
+    url = serializers.HyperlinkedIdentityField(
+        view_name="api:choice-detail", lookup_field="uuid"
+    )
+
+
+class QuestionDetailSerializer(QuestionBaseSerializer):
     class Meta:
         model = QuestionBaseSerializer.Meta.model
         fields = QuestionBaseSerializer.Meta.fields + [
             "choices",
         ]
+
+    choices = QuestionDetailChoicesSerializer(many=True, read_only=True)
 
     def update(self, instance, validated_data):
         request = self.context.get("request")
@@ -120,6 +120,10 @@ class QuestionDetailSerializer(QuestionBaseSerializer):
 
 
 class ChoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Choice
+        fields = ["url", "uuid", "question", "question_url", "text", "is_correct"]
+
     url = serializers.HyperlinkedIdentityField(
         view_name="api:choice-detail", lookup_field="uuid"
     )
@@ -127,10 +131,6 @@ class ChoiceSerializer(serializers.ModelSerializer):
     question = serializers.SlugRelatedField(
         slug_field="uuid", queryset=Question.objects.all()
     )
-
-    class Meta:
-        model = Choice
-        fields = ["url", "uuid", "question", "question_url", "text", "is_correct"]
 
     @extend_schema_field(OpenApiTypes.URI)
     def get_question_url(self, obj):
@@ -163,12 +163,6 @@ class AnswerSerializer(serializers.ModelSerializer):
         text = serializers.CharField(read_only=True)
         is_correct = serializers.BooleanField(read_only=True)
 
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    question = serializers.SlugRelatedField(
-        slug_field="uuid", queryset=Question.objects.all()
-    )
-    choices = ChoicesSerializer(many=True)
-
     class Meta:
         model = Answer
         fields = [
@@ -183,6 +177,12 @@ class AnswerSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "url": {"view_name": "api:answer-detail", "lookup_field": "uuid"},
         }
+
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    question = serializers.SlugRelatedField(
+        slug_field="uuid", queryset=Question.objects.all()
+    )
+    choices = ChoicesSerializer(many=True)
 
     @transaction.atomic()
     def create(self, validated_data):
