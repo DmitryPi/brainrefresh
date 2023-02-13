@@ -115,6 +115,7 @@ class ChoiceViewSet(
 ):
     lookup_field = "uuid"
     serializer_class = ChoiceSerializer
+    pagination_class = LimitOffsetPagination
 
     def get_permissions(self):
         if self.action == "list":

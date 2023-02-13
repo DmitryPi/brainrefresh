@@ -151,9 +151,9 @@ class QuestionViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_list_pagination(self):
+        keys = ["limit", "offset", "count", "next", "previous", "results"]
         response = self.client.get(self.list_url)
         response_keys = list(response.data.keys())
-        keys = ["limit", "offset", "count", "next", "previous", "results"]
         # Test response
         self.assertEqual(response_keys, keys)
         self.assertTrue(response.data["count"], 2)
@@ -349,7 +349,7 @@ class ChoiceViewSetTests(APITestCase):
         response = self.client.get(self.list_url)
         # Test response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 3)
+        self.assertEqual(response.data["count"], 3)
 
     def test_list_user(self):
         self.client.force_login(self.user)
@@ -362,6 +362,15 @@ class ChoiceViewSetTests(APITestCase):
         response = self.client.get(self.list_url)
         # Test response
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_list_pagination(self):
+        self.client.force_login(self.user_admin)
+        # Get API response
+        keys = ["limit", "offset", "count", "next", "previous", "results"]
+        response = self.client.get(self.list_url)
+        response_keys = list(response.data.keys())
+        # Test response
+        self.assertEqual(response_keys, keys)
 
     def test_create(self):
         self.client.force_login(self.user)
@@ -517,9 +526,9 @@ class AnswerViewSetTests(APITestCase):
     def test_list_pagination(self):
         self.client.force_login(self.user)
         # Get API response
+        keys = ["limit", "offset", "count", "next", "previous", "results"]
         response = self.client.get(self.list_url)
         response_keys = list(response.data.keys())
-        keys = ["limit", "offset", "count", "next", "previous", "results"]
         # Test response
         self.assertEqual(response_keys, keys)
 
@@ -542,9 +551,9 @@ class AnswerViewSetTests(APITestCase):
     def test_retrieve(self):
         self.client.force_login(self.user)
         # Get API response
+        keys = ["url", "uuid", "question", "choices", "is_correct", "created_at"]
         response = self.client.get(self.detail_url_user)
         response_keys = list(response.data.keys())
-        keys = ["url", "uuid", "question", "choices", "is_correct", "created_at"]
         # Test response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_keys, keys)
