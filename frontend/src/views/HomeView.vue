@@ -1,5 +1,5 @@
-<script setup>
-import QuestionList from '../components/QuestionList.vue'
+<script lang="js" setup>
+import QuestionList from "../components/QuestionList.vue";
 </script>
 
 <template>

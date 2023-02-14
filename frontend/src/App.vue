@@ -1,18 +1,16 @@
-<script setup>
+<script lang="js" setup>
 import { RouterLink, RouterView } from "vue-router";
-import Question from "./components/Question.vue";
-import QuestionList from "./components/QuestionList.vue";
 </script>
 
 <template>
-    <header>
-        <nav>
-            <RouterLink :to="{ name: 'home' }">Home</RouterLink>
-            <RouterLink :to="{ name: 'about' }">About</RouterLink>
-        </nav>
-    </header>
+  <header>
+    <nav>
+      <RouterLink :to="{ name: 'home' }">Home</RouterLink>
+      <RouterLink :to="{ name: 'about' }">About</RouterLink>
+    </nav>
+  </header>
 
-    <RouterView />
+  <RouterView />
 </template>
 
 <style scoped>
