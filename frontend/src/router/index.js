@@ -8,7 +8,7 @@ const router = createRouter({
         {
             path: '/',
             name: 'home',
-            component: HomeView
+            component: HomeView,
         },
         {
             path: '/about/',
@@ -21,17 +21,17 @@ const router = createRouter({
         {
             path: '/questions/:uuid/',
             name: 'question',
-            component: QuestionView
+            component: QuestionView,
         },
         {
             path: '/tags/',
             name: 'tags',
-            component: HomeView
+            component: HomeView,
         },
         {
             path: '/tags/:slug/',
             name: 'tag',
-            component: HomeView
+            component: HomeView,
         },
     ]
 })

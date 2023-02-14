@@ -23,7 +23,9 @@ export default {
     },
     methods: {
         fetchQuestionData(uuid) {
-            fetch(`${API_URL}/questions/${uuid}/`)
+            fetch(`${API_URL}/questions/${uuid}/`, {
+                cache: "reload",
+            })
                 .then((response) => {
                     if (!response.ok) {
                         throw new Error("Network response was not ok");
@@ -110,9 +112,7 @@ export default {
                     v-model="selectedOptions"
                     name="question"
                 />
-                <label :for="'option' + (index + 1)"
-                    >{{ choice.text }} {{ choice.is_correct }}</label
-                >
+                <label :for="'option' + (index + 1)">{{ choice.text }} {{ choice.is_correct }}</label>
             </p>
             <button type="submit">Submit</button>
         </form>
@@ -127,9 +127,7 @@ export default {
                     v-model="selectedOptions"
                     name="question"
                 />
-                <label :for="'option' + (index + 1)">
-                    {{ choice.text }} {{ choice.is_correct }}
-                </label>
+                <label :for="'option' + (index + 1)">{{ choice.text }} {{ choice.is_correct }}</label>
             </p>
             <button type="submit">Submit</button>
         </form>
@@ -139,9 +137,7 @@ export default {
         <p v-if="answerResult">Ответ верный</p>
         <p v-else>Ответ не верный</p>
         <div>
-            <button @click="questionExplain = !questionExplain">
-                Объяснение
-            </button>
+            <button @click="questionExplain = !questionExplain">Объяснение</button>
             <p v-if="questionExplain">{{ question.explanation }}</p>
         </div>
     </div>

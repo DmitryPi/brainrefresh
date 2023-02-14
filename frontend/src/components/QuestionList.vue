@@ -13,7 +13,9 @@ export default {
         };
     },
     mounted() {
-        fetch(`${API_URL}/questions/?limit=${PAGINATION_LIMIT}`)
+        fetch(`${API_URL}/questions/?limit=${PAGINATION_LIMIT}`, {
+            cache: "reload",
+        })
             .then((response) => {
                 if (!response.ok) {
                     throw new Error("Network response was not ok");
