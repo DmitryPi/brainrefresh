@@ -214,6 +214,12 @@ See detailed [cookiecutter-django Docker documentation](http://cookiecutter-djan
 
 ---
 
+### 0.5.0 - (14.02.2023)
+
+- Готовое API
+- Тестрование, кеширование, пагинация, права пользователя API
+
+
 ### 0.4.0 - (08.02.2023)
 
 - Покрытие тестами всех моделей
