@@ -1,4 +1,4 @@
-<script lang="js" setup>
+<script setup>
 import Question from "../components/Question.vue";
 </script>
 

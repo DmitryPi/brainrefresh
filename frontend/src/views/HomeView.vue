@@ -1,4 +1,4 @@
-<script lang="js" setup>
+<script setup>
 import QuestionList from "../components/QuestionList.vue";
 </script>
 

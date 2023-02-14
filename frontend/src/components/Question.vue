@@ -1,4 +1,4 @@
-<script lang="js">
+<script>
 const API_URL = import.meta.env.VITE_API_HOST_URL;
 const formTypes = {
     CHECKBOX: "CHECKBOX",
@@ -117,49 +117,37 @@ export default {
 </script>
 
 <template>
-  <h1>{{ question.title }}</h1>
+    <h1>{{ question.title }}</h1>
 
-  <template v-if="formType === 'RADIO'">
-    <form @submit.prevent="submitForm">
-      <p v-for="(choice, index) in choices" :key="choice.uuid">
-        <input
-          :id="'option' + (index + 1)"
-          type="radio"
-          :value="choice.text"
-          v-model="selectedOptions"
-          name="question"
-        />
-        <label :for="'option' + (index + 1)"
-          >{{ choice.text }} {{ choice.is_correct }}</label
-        >
-      </p>
-      <button type="submit">Submit</button>
-    </form>
-  </template>
-  <template v-else>
-    <form @submit.prevent="submitForm">
-      <p v-for="(choice, index) in choices" :key="choice.uuid">
-        <input
-          :id="'option' + (index + 1)"
-          type="checkbox"
-          :value="choice.text"
-          v-model="selectedOptions"
-          name="question"
-        />
-        <label :for="'option' + (index + 1)">
-          {{ choice.text }} {{ choice.is_correct }}
-        </label>
-      </p>
-      <button type="submit">Submit</button>
-    </form>
-  </template>
+    <template v-if="formType === 'RADIO'">
+        <form @submit.prevent="submitForm">
+            <p v-for="(choice, index) in choices" :key="choice.uuid">
+                <input :id="'option' + (index + 1)" type="radio" :value="choice.text" v-model="selectedOptions"
+                    name="question" />
+                <label :for="'option' + (index + 1)">{{ choice.text }} {{ choice.is_correct }}</label>
+            </p>
+            <button type="submit">Submit</button>
+        </form>
+    </template>
+    <template v-else>
+        <form @submit.prevent="submitForm">
+            <p v-for="(choice, index) in choices" :key="choice.uuid">
+                <input :id="'option' + (index + 1)" type="checkbox" :value="choice.text" v-model="selectedOptions"
+                    name="question" />
+                <label :for="'option' + (index + 1)">
+                    {{ choice.text }} {{ choice.is_correct }}
+                </label>
+            </p>
+            <button type="submit">Submit</button>
+        </form>
+    </template>
 
-  <div v-if="formSubmitted">
-    <p v-if="answerResult">Ответ верный</p>
-    <p v-else>Ответ не верный</p>
-    <div>
-      <button @click="questionExplain = !questionExplain">Объяснение</button>
-      <p v-if="questionExplain">{{ question.explanation }}</p>
+    <div v-if="formSubmitted">
+        <p v-if="answerResult">Ответ верный</p>
+        <p v-else>Ответ не верный</p>
+        <div>
+            <button @click="questionExplain = !questionExplain">Объяснение</button>
+            <p v-if="questionExplain">{{ question.explanation }}</p>
+        </div>
     </div>
-  </div>
 </template>
