@@ -22,7 +22,17 @@ const router = createRouter({
             path: '/questions/:uuid/',
             name: 'question',
             component: QuestionView
-        }
+        },
+        {
+            path: '/tags/',
+            name: 'tags',
+            component: HomeView
+        },
+        {
+            path: '/tags/:slug/',
+            name: 'tag',
+            component: HomeView
+        },
     ]
 })
 
