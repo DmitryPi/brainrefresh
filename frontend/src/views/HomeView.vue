@@ -3,7 +3,7 @@ import QuestionList from "../components/QuestionList.vue";
 </script>
 
 <template>
-  <main>
-    <QuestionList />
-  </main>
+    <main>
+        <QuestionList />
+    </main>
 </template>

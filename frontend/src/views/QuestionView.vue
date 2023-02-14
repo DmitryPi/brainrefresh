@@ -3,7 +3,7 @@ import Question from "../components/Question.vue";
 </script>
 
 <template>
-  <main>
-    <Question />
-  </main>
+    <main>
+        <Question />
+    </main>
 </template>
