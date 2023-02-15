@@ -81,7 +81,7 @@ classDiagram
     Question <|-- Choice
     Question <|-- Report
     Question <|-- Answer
-    Choice <|-- Answer
+    Choice <|--|> Answer
     User <|-- Answer
     User <|-- Report
 
@@ -94,14 +94,16 @@ classDiagram
         text: TextField
         explanation: TextField
         language: en | ru
+        is_published: BooleanField
         -
-        published: BooleanField
         created_at: DateTimeField
         updated_at: DateTimeField
+        published()
     }
     class Tag {
         label: CharField[100]
         slug: SlugField[110]
+        question_count()
     }
     class Choice {
         question: ForeignKey[Question, related_name='choices']
@@ -109,16 +111,26 @@ classDiagram
         uuid: UUIDField
         text: TextField
         is_correct: BooleanField
+        -
+        updated_at: DateTimeField
+        created_at: DateTimeField
     }
     class Report {
         user = ForeignKey[User, related_name='reports']
         question = ForeignKey[Question, related_name='reports']
+        -
+        msg = CharField
+        updated_at: DateTimeField
+        created_at: DateTimeField
     }
     class Answer {
         user: ForeignKey[User, related_name='answers']
         question: ForeignKey[Question, related_name='answers']
-        choice: ForeignKey[Choice, related_name='answers']
+        choices: ManyToManyField[Choice, related_name='answers']
         -
+        uuid: UUIDField
+        is_correct: BooleanField
+        updated_at: DateTimeField
         created_at: DateTimeField
     }
     class User {
