@@ -38,6 +38,7 @@ class QuestionBaseSerializer(serializers.ModelSerializer):
             "text",
             "explanation",
             "language",
+            "is_multichoice",
             "updated_at",
             "created_at",
             "tags",

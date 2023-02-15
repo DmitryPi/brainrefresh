@@ -46,6 +46,7 @@ class QuestionAdmin(admin.ModelAdmin):
     ]
     readonly_fields = [
         "uuid",
+        "is_multichoice",
         "updated_at",
         "created_at",
     ]
@@ -58,13 +59,14 @@ class QuestionAdmin(admin.ModelAdmin):
         ("Теги", {"fields": ["tags"]}),
         (
             None,
-            {"fields": ("is_published",)},
+            {"fields": ("is_multichoice", "is_published")},
         ),
     )
     list_display = [
         "title",
         "uuid",
         "language",
+        "is_multichoice",
         "is_published",
         "updated_at",
         "created_at",

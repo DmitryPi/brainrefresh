@@ -32,6 +32,7 @@ export default {
                     return response.json();
                 })
                 .then((data) => {
+                    console.log(data);
                     this.question = data;
                     this.choices = data["choices"];
                 })

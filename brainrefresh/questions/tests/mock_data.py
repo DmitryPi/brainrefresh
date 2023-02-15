@@ -1,6 +1,6 @@
 import random
 
-from .factories import Question, Tag, TagFactory
+from .factories import ChoiceFactory, Question, Tag, TagFactory
 
 tag_names = [
     "Python",
@@ -68,3 +68,10 @@ def add_random_tags_to_questions() -> None:
     for question in questions:
         random_tags = [random.choice(tags) for _ in range(random.randint(1, 5))]
         question.tags.set(random_tags)
+
+
+def add_choices_to_questions() -> None:
+    questions = Question.objects.all()
+    for question in questions:
+        batch_size = random.randint(1, 3)
+        ChoiceFactory.create_batch(batch_size, question=question)

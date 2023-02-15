@@ -8,6 +8,7 @@ from model_utils import FieldTracker
 from brainrefresh.utils.misc import get_unique_slug
 
 from .managers import QuestionManager
+from .services import check_question_is_multichoice
 
 User = get_user_model()
 
@@ -56,6 +57,7 @@ class Question(models.Model):
     text = models.TextField(blank=True)
     explanation = models.TextField(blank=True)
     language = models.CharField(max_length=5, choices=Lang.choices, default=Lang.EN)
+    is_multichoice = models.BooleanField(default=False)
     is_published = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -67,6 +69,10 @@ class Question(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        self.is_multichoice = check_question_is_multichoice(self)
+        return super().save(*args, **kwargs)
 
 
 class Choice(models.Model):
