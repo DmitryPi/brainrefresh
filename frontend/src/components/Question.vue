@@ -35,6 +35,7 @@ export default {
                     console.log(data);
                     this.question = data;
                     this.choices = data["choices"];
+                    this.setFormType();
                 })
                 .catch((error) => {
                     console.error(
@@ -43,25 +44,20 @@ export default {
                     );
                 });
         },
-
         setFormType() {
-            const correctChoices = this.choices.filter(
-                (choice) => choice.is_correct === true
-            );
-            this.formType =
-                correctChoices.length > 1
-                    ? formTypes.CHECKBOX
-                    : formTypes.RADIO;
+            this.formType = this.question.is_multichoice
+                ? formTypes.CHECKBOX
+                : formTypes.RADIO;
         },
 
-        checkRadio() {
+        checkRadioForm() {
             const answer = this.choices.find((choice) => {
                 return choice.text === this.selectedOptions;
             });
             this.answerResult = answer.is_correct;
         },
 
-        checkCheckbox() {
+        checkCheckboxForm() {
             let allCorrect = true;
             this.selectedOptions.forEach((selectedOption) => {
                 const answer = this.choices.find(
@@ -77,10 +73,10 @@ export default {
         checkAnswers() {
             switch (this.formType) {
                 case formTypes.RADIO:
-                    this.checkRadio();
+                    this.checkRadioForm();
                     break;
                 case formTypes.CHECKBOX:
-                    this.checkCheckbox(this);
+                    this.checkCheckboxForm(this);
                     break;
             }
         },
