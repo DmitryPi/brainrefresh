@@ -1,7 +1,7 @@
 <script setup>
 import { RouterLink, RouterView } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import { ref, onMounted, computed } from "vue";
+import { onMounted, computed } from "vue";
 
 const store = useAuthStore();
 const user = computed(() => {

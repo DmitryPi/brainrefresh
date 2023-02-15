@@ -1,7 +1,6 @@
 <script>
 import moment from "moment";
 
-const API_URL = import.meta.env.VITE_API_HOST_URL;
 const PAGINATION_LIMIT = 10;
 
 export default {
@@ -13,8 +12,8 @@ export default {
         };
     },
     mounted() {
-        fetch(`${API_URL}/questions/?limit=${PAGINATION_LIMIT}`, {
-            cache: "reload",
+        fetch(`/api/questions/?limit=${PAGINATION_LIMIT}`, {
+            cache: "no-cache",
         })
             .then((response) => {
                 if (!response.ok) {

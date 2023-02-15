@@ -1,5 +1,4 @@
 <script>
-const API_URL = import.meta.env.VITE_API_HOST_URL;
 const formTypes = {
     CHECKBOX: "CHECKBOX",
     RADIO: "RADIO",
@@ -23,8 +22,8 @@ export default {
     },
     methods: {
         fetchQuestionData(uuid) {
-            fetch(`${API_URL}/questions/${uuid}/`, {
-                cache: "reload",
+            fetch(`/api/questions/${uuid}/`, {
+                cache: "no-cache",
             })
                 .then((response) => {
                     if (!response.ok) {
