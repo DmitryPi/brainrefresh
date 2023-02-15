@@ -1,4 +1,7 @@
 <script>
+import axios from "axios";
+import { computed } from "vue";
+
 const formTypes = {
     CHECKBOX: "CHECKBOX",
     RADIO: "RADIO",
@@ -32,41 +35,52 @@ export default {
                     return response.json();
                 })
                 .then((data) => {
-                    console.log(data);
                     this.question = data;
                     this.choices = data["choices"];
-                    this.setFormType();
+                    this.formType = this.question.is_multichoice
+                        ? formTypes.CHECKBOX
+                        : formTypes.RADIO;
                 })
                 .catch((error) => {
                     console.error(
-                        "There was a problem with the fetch operation:",
+                        "There was a problem with the fetchQuestionData operation:",
                         error
                     );
                 });
         },
-        setFormType() {
-            this.formType = this.question.is_multichoice
-                ? formTypes.CHECKBOX
-                : formTypes.RADIO;
-        },
 
-        checkRadioForm() {
+        async fetchChoiceData(uuid) {
+            try {
+                const response = await axios.get(`/api/choices/${uuid}/`);
+                return response.data;
+            } catch (error) {
+                console.error(error);
+                throw error;
+            }
+        },
+        async checkRadioForm() {
             const answer = this.choices.find((choice) => {
                 return choice.text === this.selectedOptions;
             });
-            this.answerResult = answer.is_correct;
+            const choiceData = await this.fetchChoiceData(
+                answer.uuid.toString()
+            );
+            this.answerResult = choiceData.is_correct;
         },
 
-        checkCheckboxForm() {
+        async checkCheckboxForm() {
             let allCorrect = true;
-            this.selectedOptions.forEach((selectedOption) => {
+            for (const selectedOption of this.selectedOptions) {
                 const answer = this.choices.find(
                     (choice) => choice.text === selectedOption
                 );
-                if (!answer || !answer.is_correct) {
+                const choiceData = await this.fetchChoiceData(
+                    answer.uuid.toString()
+                );
+                if (!choiceData.is_correct) {
                     allCorrect = false;
                 }
-            });
+            }
             this.answerResult = allCorrect;
         },
 
@@ -81,7 +95,7 @@ export default {
             }
         },
 
-        saveAnswer() {},
+        async saveUserAnswer() {},
 
         submitForm() {
             if (!this.selectedOptions.length) {
@@ -89,7 +103,6 @@ export default {
             }
             this.formSubmitted = true;
             this.checkAnswers();
-            this.saveAnswer();
         },
     },
 };
