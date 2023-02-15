@@ -139,9 +139,6 @@ class ChoiceViewSet(
 
     @method_decorator(cache_page(settings.API_CACHE_TIME))
     def retrieve(self, request, *args, **kwargs):
-        import time
-
-        time.sleep(5)
         return super().retrieve(request, *args, **kwargs)
 
     def perform_destroy(self, instance):

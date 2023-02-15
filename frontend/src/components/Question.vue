@@ -1,6 +1,5 @@
 <script>
 import axios from "axios";
-import { computed } from "vue";
 
 const formTypes = {
     CHECKBOX: "CHECKBOX",
@@ -84,25 +83,22 @@ export default {
             this.answerResult = allCorrect;
         },
 
-        checkAnswers() {
-            switch (this.formType) {
-                case formTypes.RADIO:
-                    this.checkRadioForm();
-                    break;
-                case formTypes.CHECKBOX:
-                    this.checkCheckboxForm(this);
-                    break;
+        async checkAnswers() {
+            if (this.formType === formTypes.RADIO) {
+                await this.checkRadioForm();
+            } else if (this.formType === formTypes.CHECKBOX) {
+                await this.checkCheckboxForm(this);
             }
         },
 
         async saveUserAnswer() {},
 
-        submitForm() {
-            if (!this.selectedOptions.length) {
+        async submitForm() {
+            if (!this.selectedOptions.length || this.formSubmitted) {
                 return;
             }
+            await this.checkAnswers();
             this.formSubmitted = true;
-            this.checkAnswers();
         },
     },
 };
@@ -123,7 +119,7 @@ export default {
                 />
                 <label :for="'option' + (index + 1)">{{ choice.text }} {{ choice.is_correct }}</label>
             </p>
-            <button type="submit">Submit</button>
+            <button type="submit" :disabled="formSubmitted">Submit</button>
         </form>
     </template>
     <template v-else>
@@ -138,7 +134,7 @@ export default {
                 />
                 <label :for="'option' + (index + 1)">{{ choice.text }} {{ choice.is_correct }}</label>
             </p>
-            <button type="submit">Submit</button>
+            <button type="submit" :disabled="formSubmitted">Submit</button>
         </form>
     </template>
 
