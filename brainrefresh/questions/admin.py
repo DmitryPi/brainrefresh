@@ -112,6 +112,6 @@ class AnswerAdmin(admin.ModelAdmin):
     list_select_related = ["question", "user"]
     raw_id_fields = ["choices"]
 
-    def get_queryset(self, request, *args, **kwargs):
-        queryset = super().get_queryset(request, *args, **kwargs)
-        return queryset.select_related("question", "user")
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.select_related("user", "question")
