@@ -1,6 +1,6 @@
 <script setup>
-import { RouterLink, RouterView } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import Header from "./components/Header.vue";
 import { onMounted, computed } from "vue";
 
 const store = useAuthStore();
@@ -14,17 +14,6 @@ onMounted(() => {
 
 
 <template>
-    <header>
-        <nav>
-            <RouterLink :to="{ name: 'home' }">Home</RouterLink>
-            <RouterLink :to="{ name: 'about' }">About</RouterLink>
-            <div v-if="user">Welcome, {{ user.username }}!</div>
-            <div v-else>Please log in.</div>
-        </nav>
-    </header>
-
+    <Header :user="user" />
     <RouterView />
 </template>
-
-<style lang="scss" scoped>
-</style>

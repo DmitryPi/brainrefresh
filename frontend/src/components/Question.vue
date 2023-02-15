@@ -5,11 +5,16 @@ const formTypes = {
     CHECKBOX: "CHECKBOX",
     RADIO: "RADIO",
 };
-// TODO: get csrf from session/cookie
-const csrfToken = document.querySelector(
-    'input[name="csrfmiddlewaretoken"]'
-).value;
-axios.defaults.headers.common["X-CSRFToken"] = csrfToken;
+
+try {
+    // TODO: get csrf from session/cookie
+    const csrfToken = document.querySelector(
+        'input[name="csrfmiddlewaretoken"]'
+    ).value;
+    axios.defaults.headers.common["X-CSRFToken"] = csrfToken;
+} catch (error) {
+    console.log(error);
+}
 
 export default {
     name: "Question",
