@@ -93,17 +93,17 @@ class QuestionViewSetTests(APITestCase):
         self.question_1 = QuestionFactory(
             user=self.user,
             title="What is your name?",
-            published=True,
+            is_published=True,
         )
         self.question_2 = QuestionFactory(
             user=self.user,
             title="What is your favorite color?",
-            published=True,
+            is_published=True,
         )
         self.question_3 = QuestionFactory(
             user=self.user,
             title="What is your favorite food?",
-            published=False,
+            is_published=False,
         )
         self.tag_1 = TagFactory(label="personal", slug="personal-1")
         self.tag_2 = TagFactory(label="favorites")
@@ -174,9 +174,9 @@ class QuestionViewSetTests(APITestCase):
         # Create some data
         tag_1 = TagFactory(label="Python")
         tag_2 = TagFactory(label="Some Complexity")
-        QuestionFactory.create_batch(3, tags=[tag_1, tag_2], published=True)
-        QuestionFactory.create_batch(5, tags=[tag_2], published=True)
-        QuestionFactory(tags=[tag_2], published=False)  # won't be counted
+        QuestionFactory.create_batch(3, tags=[tag_1, tag_2], is_published=True)
+        QuestionFactory.create_batch(5, tags=[tag_2], is_published=True)
+        QuestionFactory(tags=[tag_2], is_published=False)  # won't be counted
         # urls
         url_1 = f"{self.list_url}?tag={tag_1.slug}"
         url_2 = f"{self.list_url}?tag={tag_2.slug}"
@@ -189,8 +189,8 @@ class QuestionViewSetTests(APITestCase):
 
     def test_list_filter_by_language(self):
         """Hard to test without isolating this test"""
-        QuestionFactory.create_batch(3, language=Question.Lang.EN, published=True)
-        QuestionFactory.create_batch(5, language=Question.Lang.RU, published=True)
+        QuestionFactory.create_batch(3, language=Question.Lang.EN, is_published=True)
+        QuestionFactory.create_batch(5, language=Question.Lang.RU, is_published=True)
         # urls
         url_1 = f"{self.list_url}?language={Question.Lang.EN}"
         url_2 = f"{self.list_url}?language={Question.Lang.RU}"
@@ -205,8 +205,8 @@ class QuestionViewSetTests(APITestCase):
         # Create some data
         user_1 = UserFactory(username="seombody")
         user_2 = SuperUserFactory(username="killer1337")
-        QuestionFactory.create_batch(3, user=user_1, published=True)
-        QuestionFactory.create_batch(5, user=user_2, published=True)
+        QuestionFactory.create_batch(3, user=user_1, is_published=True)
+        QuestionFactory.create_batch(5, user=user_2, is_published=True)
         # urls
         url_1 = f"{self.list_url}?user={user_1.username}"
         url_2 = f"{self.list_url}?user={user_2.username}"

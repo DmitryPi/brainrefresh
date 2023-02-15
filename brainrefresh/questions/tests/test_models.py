@@ -96,7 +96,7 @@ class QuestionTests(TestCase):
             "text": "Test Question Text",
             "explanation": "Test explanation",
             "language": Question.Lang.EN,
-            "published": True,
+            "is_published": True,
         }
         self.question = QuestionFactory(**self.question_data)
 
@@ -122,7 +122,7 @@ class QuestionTests(TestCase):
         self.assertEqual(self.question.title, self.question_data["title"])
         self.assertEqual(self.question.text, self.question_data["text"])
         self.assertEqual(self.question.language, Question.Lang.EN)
-        self.assertEqual(self.question.published, True)
+        self.assertEqual(self.question.is_published, True)
         self.assertIsInstance(self.question.uuid, UUID)
         self.assertIsInstance(self.question.created_at, timezone.datetime)
         self.assertIsInstance(self.question.updated_at, timezone.datetime)
@@ -147,7 +147,7 @@ class ChoiceTests(TestCase):
             "text": "Test Question Text",
             "explanation": "Test explanation",
             "language": Question.Lang.EN,
-            "published": True,
+            "is_published": True,
         }
         self.question = QuestionFactory(**self.question_data)
         self.choice_data = {

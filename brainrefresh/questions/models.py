@@ -56,7 +56,7 @@ class Question(models.Model):
     text = models.TextField(blank=True)
     explanation = models.TextField(blank=True)
     language = models.CharField(max_length=5, choices=Lang.choices, default=Lang.EN)
-    published = models.BooleanField(default=False)
+    is_published = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

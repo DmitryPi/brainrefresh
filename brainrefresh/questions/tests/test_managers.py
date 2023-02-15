@@ -5,9 +5,9 @@ from .factories import Question, QuestionFactory
 
 class QuestionManagerTestCase(TestCase):
     def setUp(self):
-        self.question1 = QuestionFactory(published=True)
-        self.question2 = QuestionFactory(published=False)
-        self.question3 = QuestionFactory(published=True)
+        self.question1 = QuestionFactory(is_published=True)
+        self.question2 = QuestionFactory(is_published=False)
+        self.question3 = QuestionFactory(is_published=True)
 
     def test_published_manager(self):
         published_questions = Question.objects.published()

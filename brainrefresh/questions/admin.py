@@ -15,11 +15,11 @@ class TagAdmin(admin.ModelAdmin):
 
 
 def make_published(modeladmin, request, qs):
-    qs.update(published=True)
+    qs.update(is_published=True)
 
 
 def make_unpublished(modeladmin, request, qs):
-    qs.update(published=False)
+    qs.update(is_published=False)
 
 
 def update_lang_ru(modeladmin, request, qs):
@@ -58,14 +58,14 @@ class QuestionAdmin(admin.ModelAdmin):
         ("Теги", {"fields": ["tags"]}),
         (
             None,
-            {"fields": ("published",)},
+            {"fields": ("is_published",)},
         ),
     )
     list_display = [
         "title",
         "uuid",
         "language",
-        "published",
+        "is_published",
         "updated_at",
         "created_at",
     ]

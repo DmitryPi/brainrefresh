@@ -3,7 +3,7 @@ from django.db import models
 
 class QuestionQuerySet(models.QuerySet):
     def published(self):
-        return self.filter(published=True)
+        return self.filter(is_published=True)
 
 
 class QuestionManager(models.Manager):

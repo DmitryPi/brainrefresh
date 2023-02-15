@@ -29,7 +29,7 @@ class QuestionFactory(DjangoModelFactory):
     text = Faker("text")
     explanation = Faker("text")
     language = Question.Lang.EN
-    published = FuzzyChoice([True, False])
+    is_published = FuzzyChoice([True, False])
 
     @post_generation
     def tags(self, create: bool, extracted: Sequence[Any], **kwargs):
