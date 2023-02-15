@@ -103,8 +103,15 @@ class AnswerAdmin(admin.ModelAdmin):
     readonly_fields = [
         "uuid",
     ]
-    filter_horizontal = ["choices"]
+    fieldsets = (
+        (None, {"fields": ("uuid", "user")}),
+        (None, {"fields": ("choices",)}),
+        (None, {"fields": ("is_correct",)}),
+    )
+    list_display = ("__str__", "is_correct", "created_at")
+    list_select_related = ["question", "user"]
+    raw_id_fields = ["choices"]
 
-    def get_queryset(self, request):
-        queryset = super().get_queryset(request)
-        return queryset.select_related("user")
+    def get_queryset(self, request, *args, **kwargs):
+        queryset = super().get_queryset(request, *args, **kwargs)
+        return queryset.select_related("question", "user")
