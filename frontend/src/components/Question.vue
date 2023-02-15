@@ -14,6 +14,7 @@ export default {
             choices: [],
             formType: formTypes.RADIO,
             selectedOptions: [],
+            answerChoices: [],
             answerResult: null,
             formSubmitted: false,
             questionExplain: false,
@@ -61,9 +62,9 @@ export default {
             const answer = this.choices.find((choice) => {
                 return choice.text === this.selectedOptions;
             });
-            const choiceData = await this.fetchChoiceData(
-                answer.uuid.toString()
-            );
+            const choiceUUID = answer.uuid.toString();
+            const choiceData = await this.fetchChoiceData(choiceUUID);
+            this.answerChoices.push(choiceUUID);
             this.answerResult = choiceData.is_correct;
         },
 
@@ -73,9 +74,10 @@ export default {
                 const answer = this.choices.find(
                     (choice) => choice.text === selectedOption
                 );
-                const choiceData = await this.fetchChoiceData(
-                    answer.uuid.toString()
-                );
+                const choiceUUID = answer.uuid.toString();
+                const choiceData = await this.fetchChoiceData(choiceUUID);
+                this.answerChoices.push(choiceUUID);
+
                 if (!choiceData.is_correct) {
                     allCorrect = false;
                 }
@@ -91,13 +93,29 @@ export default {
             }
         },
 
-        async saveUserAnswer() {},
+        async saveUserAnswer() {
+            const postData = {
+                question: this.question.uuid,
+                choices: this.answerChoices.map((choice) => ({ uuid: choice })),
+                is_correct: this.answerResult,
+            };
+            try {
+                const response = await axios.post("/api/answers/", postData);
+                console.log(response.data);
+            } catch (error) {
+                console.error(
+                    "There was a problem with the saveUserAnswer operation:",
+                    error
+                );
+            }
+        },
 
         async submitForm() {
             if (!this.selectedOptions.length || this.formSubmitted) {
                 return;
             }
             await this.checkAnswers();
+            this.saveUserAnswer();
             this.formSubmitted = true;
         },
     },
