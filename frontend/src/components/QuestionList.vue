@@ -4,8 +4,8 @@ import { onMounted, ref } from "vue";
 
 const DATE_FMT = "MMMM Do YYYY, h:mm:ss";
 const PAGINATION_LIMIT = 10;
-const loading = ref(true);
-const questions = ref([]);
+let loading = ref(true);
+let questions = ref([]);
 
 function formatDate(date) {
     return moment(date).format(DATE_FMT);

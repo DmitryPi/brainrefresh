@@ -1,20 +1,13 @@
 <script>
 import axios from "axios";
 
+const csrfToken = document.cookie["csrftoken"];
 const formTypes = {
     CHECKBOX: "CHECKBOX",
     RADIO: "RADIO",
 };
 
-try {
-    // TODO: get csrf from session/cookie
-    const csrfToken = document.querySelector(
-        'input[name="csrfmiddlewaretoken"]'
-    ).value;
-    axios.defaults.headers.common["X-CSRFToken"] = csrfToken;
-} catch (error) {
-    console.log(error);
-}
+axios.defaults.headers.common["X-CSRFToken"] = csrfToken;
 
 export default {
     name: "Question",
@@ -138,13 +131,8 @@ export default {
     <template v-if="formType === 'RADIO'">
         <form @submit.prevent="submitForm">
             <p v-for="(choice, index) in choices" :key="choice.uuid">
-                <input
-                    :id="'option' + (index + 1)"
-                    type="radio"
-                    :value="choice.text"
-                    v-model="selectedOptions"
-                    name="question"
-                />
+                <input :id="'option' + (index + 1)" type="radio" :value="choice.text" v-model="selectedOptions"
+                    name="question" />
                 <label :for="'option' + (index + 1)">{{ choice.text }} {{ choice.is_correct }}</label>
             </p>
             <button type="submit" :disabled="formSubmitted">Submit</button>
@@ -153,13 +141,8 @@ export default {
     <template v-else>
         <form @submit.prevent="submitForm">
             <p v-for="(choice, index) in choices" :key="choice.uuid">
-                <input
-                    :id="'option' + (index + 1)"
-                    type="checkbox"
-                    :value="choice.text"
-                    v-model="selectedOptions"
-                    name="question"
-                />
+                <input :id="'option' + (index + 1)" type="checkbox" :value="choice.text" v-model="selectedOptions"
+                    name="question" />
                 <label :for="'option' + (index + 1)">{{ choice.text }} {{ choice.is_correct }}</label>
             </p>
             <button type="submit" :disabled="formSubmitted">Submit</button>

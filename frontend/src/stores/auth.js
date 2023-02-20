@@ -7,7 +7,7 @@ export const useAuthStore = defineStore('auth', {
     }),
     getters: {
         getUser(state) {
-            return state.user
+            return state.user;
         }
     },
     actions: {
@@ -16,8 +16,12 @@ export const useAuthStore = defineStore('auth', {
                 const response = await axios.get('/api/users/me/');
                 this.user = response.data;
             } catch (error) {
-                console.error(error)
+                if (error.code === "ERR_BAD_REQUEST") {
+                    console.log("Not authenticated: 403");
+                } else {
+                    console.error(error);
+                }
             }
         }
     }
-})
+});
