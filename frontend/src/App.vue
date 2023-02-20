@@ -1,12 +1,9 @@
 <script setup>
 import { useAuthStore } from "@/stores/auth";
+import { onMounted } from "vue";
 import Header from "./components/Header.vue";
-import { onMounted, computed } from "vue";
 
 const store = useAuthStore();
-const user = computed(() => {
-    return store.user;
-});
 onMounted(() => {
     store.fetchUser();
 });
@@ -14,6 +11,6 @@ onMounted(() => {
 
 
 <template>
-    <Header :user="user" />
+    <Header />
     <RouterView />
 </template>
